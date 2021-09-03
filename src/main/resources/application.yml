@@ -1,0 +1,23 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: dgca-validation-decorator
+
+management:
+  endpoint:
+    info:
+      enabled: true
+    health:
+      enabled: true
+  endpoints:
+    enabled-by-default: false
+    web:
+      base-path: /management
+      exposure:
+        include: info,health
+
+identity:
+  qrcode:
+    protocol: DCCVALIDATION
+    protocolVersion: 1.0.0

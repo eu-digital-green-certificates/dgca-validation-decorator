@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+
+  dgca-validation-decorator:
+    build: .
+    image: eu-digital-green-certificates/dgca-businessrule-service
+    container_name: dgca-validation-decorator
+    ports:
+      - 8080:8080
