@@ -17,6 +17,7 @@
  * limitations under the License.
  * ---license-end
  */
+
 package eu.europa.ec.dgc.validation.decorator.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -57,7 +58,8 @@ public class DccVerificationConfig {
     }
 
     @Bean
-    CertLogicEngine certLogicEngine(AffectedFieldsDataRetriever affectedFieldsDataRetriever, JsonLogicValidator jsonLogicValidator) {
+    CertLogicEngine certLogicEngine(AffectedFieldsDataRetriever affectedFieldsDataRetriever,
+            JsonLogicValidator jsonLogicValidator) {
         return new DefaultCertLogicEngine(affectedFieldsDataRetriever, jsonLogicValidator);
     }
 }

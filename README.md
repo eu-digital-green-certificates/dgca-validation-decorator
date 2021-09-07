@@ -1,1 +1,1 @@
-# dgca-booking-service-decorator
+# dgca-validation-decorator

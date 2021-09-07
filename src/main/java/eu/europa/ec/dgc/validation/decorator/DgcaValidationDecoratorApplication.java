@@ -17,6 +17,7 @@
  * limitations under the License.
  * ---license-end
  */
+
 package eu.europa.ec.dgc.validation.decorator;
 
 import org.springframework.boot.SpringApplication;
@@ -25,7 +26,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class DgcaValidationDecoratorApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(DgcaValidationDecoratorApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(DgcaValidationDecoratorApplication.class, args);
+    }
 }

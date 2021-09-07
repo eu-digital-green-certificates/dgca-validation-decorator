@@ -17,6 +17,7 @@
  * limitations under the License.
  * ---license-end
  */
+
 package eu.europa.ec.dgc.validation.decorator.config;
 
 import eu.europa.ec.dgc.gateway.connector.dto.ProblemReportDto;
@@ -49,11 +50,14 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ProblemReportDto> handleException(DccException e) {
         log.error(e.getMessage());
         return ResponseEntity
-            .status(e.getStatus())
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(new ProblemReportDto("", "Dcc Error", "", e.getMessage()));
+                .status(e.getStatus())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new ProblemReportDto("", "Dcc Error", "", e.getMessage()));
     }
 
+    /**
+     * Exception Handler to handle {@link JwtException} Exceptions.
+     */
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<ProblemReportDto> handleException(JwtException e) {
         log.error(e.getMessage());
@@ -65,22 +69,22 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
-        MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         StringBuilder sb = new StringBuilder();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
 
             sb.append(error.getObjectName())
-                .append('.')
-                .append(fieldName)
-                .append(' ')
-                .append(errorMessage)
-                .append(", ");
+                    .append('.')
+                    .append(fieldName)
+                    .append(' ')
+                    .append(errorMessage)
+                    .append(", ");
         });
         return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(new ProblemReportDto("", "Validation Error", "", sb.toString()));
+                .status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new ProblemReportDto("", "Validation Error", "", sb.toString()));
     }
 }

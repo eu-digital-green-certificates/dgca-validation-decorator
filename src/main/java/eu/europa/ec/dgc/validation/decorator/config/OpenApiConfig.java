@@ -17,6 +17,7 @@
  * limitations under the License.
  * ---license-end
  */
+
 package eu.europa.ec.dgc.validation.decorator.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
@@ -51,13 +52,12 @@ public class OpenApiConfig {
             version = "dev";
         }
         return new OpenAPI()
-            .info(new Info()
-                .title("EU Digital COVID Certificate Validation Decorator")
-                .description("The API provides functionalities for validating  "
-                    + "EU digital COVID certificates.")
-                .version(version)
-                .license(new License()
-                    .name("Apache 2.0")
-                    .url("https://www.apache.org/licenses/LICENSE-2.0")));
+                .info(new Info()
+                        .title("EU Digital COVID Certificate Validation Decorator")
+                        .description("The API provides functionalities for validating EU digital COVID certificates.")
+                        .version(version)
+                        .license(new License()
+                                .name("Apache 2.0")
+                                .url("https://www.apache.org/licenses/LICENSE-2.0")));
     }
 }

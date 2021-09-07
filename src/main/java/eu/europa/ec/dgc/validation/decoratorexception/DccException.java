@@ -17,15 +17,17 @@
  * limitations under the License.
  * ---license-end
  */
+
+
 package eu.europa.ec.dgc.validation.decoratorexception;
 
 import lombok.Getter;
 
 public class DccException extends RuntimeException {
 
-	@Getter
-	private int status = 500;
-	
+    @Getter
+    private int status = 500;
+
     public DccException(String message, Throwable inner) {
         super(message, inner);
     }
