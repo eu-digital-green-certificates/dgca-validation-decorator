@@ -26,10 +26,14 @@ import org.springframework.context.annotation.Configuration;
 
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "identity.qrcode")
-public class QrCodeProperties {
+@ConfigurationProperties("dgc")
+public class TokenProperties {
 
-    private String protocol;
-
-    private String protocolVersion;
+    private String algorithm;
+    
+    private int keysize;
+    
+    private String publicKey;
+    
+    private String privateKey;
 }

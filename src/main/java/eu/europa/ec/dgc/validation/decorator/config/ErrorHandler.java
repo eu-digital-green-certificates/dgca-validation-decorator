@@ -21,7 +21,7 @@
 package eu.europa.ec.dgc.validation.decorator.config;
 
 import eu.europa.ec.dgc.gateway.connector.dto.ProblemReportDto;
-import eu.europa.ec.dgc.validation.decoratorexception.DccException;
+import eu.europa.ec.dgc.validation.decorator.exception.DccException;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -39,26 +39,32 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class DccVerificationConfig {
 
+    /**
+     * Build object mapper for service.
+     * 
+     * @return {@link ObjectMapper}
+     */
     @Bean
-    ObjectMapper objectMapper() {
+    public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         return objectMapper;
     }
 
     @Bean
-    AffectedFieldsDataRetriever affectedFieldsDataRetriever(ObjectMapper objectMapper) throws JsonProcessingException {
+    public AffectedFieldsDataRetriever affectedFieldsDataRetriever(ObjectMapper objectMapper)
+            throws JsonProcessingException {
         JsonNode jsonNode = objectMapper.readTree(JsonSchemaKt.JSON_SCHEMA_V1);
         return new DefaultAffectedFieldsDataRetriever(jsonNode, objectMapper);
     }
 
     @Bean
-    JsonLogicValidator jsonLogicValidator() {
+    public JsonLogicValidator jsonLogicValidator() {
         return new DefaultJsonLogicValidator();
     }
 
     @Bean
-    CertLogicEngine certLogicEngine(AffectedFieldsDataRetriever affectedFieldsDataRetriever,
+    public CertLogicEngine certLogicEngine(AffectedFieldsDataRetriever affectedFieldsDataRetriever,
             JsonLogicValidator jsonLogicValidator) {
         return new DefaultCertLogicEngine(affectedFieldsDataRetriever, jsonLogicValidator);
     }

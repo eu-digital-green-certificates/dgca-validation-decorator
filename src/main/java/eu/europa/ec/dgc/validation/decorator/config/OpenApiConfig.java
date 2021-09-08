@@ -51,13 +51,12 @@ public class OpenApiConfig {
             // build properties is not available if starting from IDE without running mvn before (so fake this)
             version = "dev";
         }
-        return new OpenAPI()
-                .info(new Info()
-                        .title("EU Digital COVID Certificate Validation Decorator")
-                        .description("The API provides functionalities for validating EU digital COVID certificates.")
-                        .version(version)
-                        .license(new License()
-                                .name("Apache 2.0")
-                                .url("https://www.apache.org/licenses/LICENSE-2.0")));
+        return new OpenAPI().info(new Info()
+                .title("EU Digital COVID Certificate Validation Decorator")
+                .description("The API provides functionalities for validating EU digital COVID certificates.")
+                .version(version)
+                .license(new License()
+                        .name("Apache 2.0")
+                        .url("https://www.apache.org/licenses/LICENSE-2.0")));
     }
 }

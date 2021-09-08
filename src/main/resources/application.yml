@@ -1,5 +1,36 @@
+identity:
+  protocol: DCCVALIDATION
+  protocolVersion: 1.0.0
+  #### serviceIdentity
+  serviceIdentityUrl: https://serviceprovider/
+  #### validationIdentity
+  validationIdentityUrl: https://validation.serviceprovider/
+  servicePovider: Service Provider.com
+
+token:
+  algorithm: EC
+  keysize: 256
+  publicKey: MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEIPrtYsW9+Juwp/mt7h8FJ3LgFRIUl2Vlmcl1DUm5gNHl0LnHIL4Jff6mg6yVhehdQiMvkhUtTvmFIUWONSJEnw==
+  privateKey: MEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCBSuPIbykwH24sjQsTneeN6EyjiA1NK5W7uca+HxmGmWw==
+
+dgc:
+  businessRulesDownload:
+    timeInterval: 1800000
+    lockLimit: 3600000
+  certificatesDownloader:
+    timeInterval: 1800000
+    lockLimit: 3600000
+  valueSetsDownload:
+    timeInterval: 1800000
+    lockLimit: 3600000
+  serviceUrl: https://validation-service.de
+  keyStoreFile: certs/dev-test.jks
+  keyStorePassword: dcc
+  privateKeyPassword: dcc
+
 server:
   port: 8080
+
 spring:
   application:
     name: dgca-validation-decorator
@@ -17,7 +48,9 @@ management:
       exposure:
         include: info,health
 
-identity:
-  qrcode:
-    protocol: DCCVALIDATION
-    protocolVersion: 1.0.0
+springdoc:
+  api-docs:
+    path: /api/docs
+    enabled: true
+  swagger-ui:
+    path: /swagger

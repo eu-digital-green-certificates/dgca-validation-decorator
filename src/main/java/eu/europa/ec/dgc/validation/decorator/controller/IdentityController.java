@@ -20,26 +20,49 @@
 
 package eu.europa.ec.dgc.validation.decorator.controller;
 
+import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse;
+import eu.europa.ec.dgc.validation.decorator.service.IdentityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
-@RequestMapping("/")
-public class IdentityDocumentController {
+@RequiredArgsConstructor
+public class IdentityController {
 
+    private static final String PATH = "/identity/{elementName}/{elementId}";
+
+    private final IdentityService identityService;
+    
+    /**
+     * Delivers a JSON description of public keys and endpoints.
+     * 
+     * @param elementName Name of element
+     * @param elementId ID of element
+     * @return {@link IdentityResponse}
+     */
     @Operation(summary = "The identity document endpoint delivers a JSON description of public keys and endpoints", 
             description = "The identity document endpoint delivers a JSON description of public keys and endpoints")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "OK"),
-        @ApiResponse(responseCode = "404", description = "Not found")
+        @ApiResponse(responseCode = "400", description = "Bad Request / Validation errors"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized, if no active session is attached"),
+        @ApiResponse(responseCode = "404", description = "Not Found"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     })
-    @GetMapping(value = "/identity/{rootElement}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void identity() {
-        // TODO search identity
+    @GetMapping(value = PATH, produces = MediaType.APPLICATION_JSON_VALUE)
+    public IdentityResponse identity(
+            @PathVariable(name = "elementName", required = true) String elementName,
+            @PathVariable(name = "elementId", required = false) String elementId) {
+        log.debug("Incoming GET request to '{}' with element name '{}' and element id '{}'", 
+                PATH, elementName, elementId);
+        return identityService.getIdentity(elementId, elementName);
     }
 }

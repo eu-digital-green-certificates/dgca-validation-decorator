@@ -18,20 +18,31 @@
  * ---license-end
  */
 
-package eu.europa.ec.dgc.validation.decorator.service;
 
-import eu.europa.ec.dgc.validation.decorator.dto.SubjectDto;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+package eu.europa.ec.dgc.validation.decorator.exception;
 
-@Service
-@RequiredArgsConstructor
-public class SubjectService {
+import lombok.Getter;
 
-    public SubjectDto generate() {
-        // TODO impl
-        return SubjectDto.builder()
-                .subject("TODO add subject")
-                .build();
+public class DccException extends RuntimeException {
+
+    @Getter
+    private int status = 500;
+
+    public DccException(String message, Throwable inner) {
+        super(message, inner);
+    }
+
+    public DccException(String message) {
+        super(message);
+    }
+
+    public DccException(String message, Throwable inner, int status) {
+        super(message, inner);
+        this.status = status;
+    }
+
+    public DccException(String message, int status) {
+        super(message);
+        this.status = status;
     }
 }

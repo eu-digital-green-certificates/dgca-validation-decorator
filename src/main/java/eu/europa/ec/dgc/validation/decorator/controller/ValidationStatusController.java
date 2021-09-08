@@ -35,8 +35,6 @@ public class ValidationStatusController {
 
     /**
      * Provides information on the current status.
-     * 
-     * @param accessToken
      */
     @Operation(summary = "The validation status endpoint provides the validation result of a subject",
             description = "The validation status endpoint provides the validation result of a subject")
@@ -47,8 +45,7 @@ public class ValidationStatusController {
         @ApiResponse(responseCode = "410", description = "Gone. Subject does not exist anymore")
     })
     @GetMapping(value = "/status", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void reject(
-            @RequestHeader("Authorization") String accessToken) {
+    public void reject(@RequestHeader("Authorization") String accessToken) {
         // TODO impl
     }
 }
