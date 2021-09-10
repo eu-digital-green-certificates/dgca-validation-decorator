@@ -44,7 +44,7 @@ public class InitializeController {
     /**
      * Delivers data for a QR in JSON format.
      * 
-     * @param subjectId Subject ID
+     * @param subject Subject
      * @return {@link QrCodeDto} content for QR code
      */
     @Operation(summary = "The provision endpoint is the public endpoint for receiving the initialization QR Code", 
@@ -57,8 +57,8 @@ public class InitializeController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     })
     @GetMapping(value = PATH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public QrCodeDto initialize(@PathVariable(value = "subject", required = true) String subjectId) {
-        log.debug("Incoming GET request to '{}' with subject ID '{}'", PATH, subjectId);
-        return initializeService.getBySubject(subjectId); 
+    public QrCodeDto initialize(@PathVariable(value = "subject", required = true) String subject) {
+        log.debug("Incoming GET request to '{}' with subject '{}'", PATH, subject);
+        return initializeService.getBySubject(subject); 
     }
 }

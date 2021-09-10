@@ -20,36 +20,32 @@
 
 package eu.europa.ec.dgc.validation.decorator.config;
 
-import io.jsonwebtoken.SignatureAlgorithm;
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import java.time.Duration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
-@Data
 @Configuration
-@ConfigurationProperties("token")
-public class TokenProperties {
+public class RestTemplateConfig {
 
-    public static final String ALGORITHM_ELLIPTIC_CURVE = "ES";
-    
-    private String type;
-    
-    private String algorithm;
+    @Value("${identity.restTemplate.connectionTimeout:3000}")
+    private int connectionTimeout;
 
-    private int keysize;
+    @Value("${identity.restTemplate.readTimeout:3000}")
+    private int readTimeout;
 
-    private String issuer;
-    
-    private int validity; 
-    
-    private String publicKey;
-
-    private String privateKey;
-    
-    private String keyAlgorithm;
-
-    public SignatureAlgorithm getSignatureAlgorithm() {
-        String name = String.format("%s%d", algorithm.toUpperCase(), keysize);
-        return SignatureAlgorithm.forName(name);        
+    /**
+     * Build {@link RestTemplate} for current project.
+     * 
+     * @param builder {@link RestTemplateBuilder}
+     * @return {@link RestTemplate}
+     */
+    @Bean
+    public RestTemplate restTemplate(RestTemplateBuilder builder) {
+        return builder.setConnectTimeout(Duration.ofMillis(this.connectionTimeout))
+                .setReadTimeout(Duration.ofMillis(this.readTimeout))
+                .build();
     }
 }

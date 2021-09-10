@@ -52,11 +52,11 @@ public class IdentityService {
     /**
      * Create identity Object with given informations.
      * 
-     * @param elementId Element ID
-     * @param elementName Element Name
+     * @param element Element
+     * @param id ID
      * @return {@link IdentityResponse}
      */
-    public IdentityResponse getIdentity(final String elementId, final String elementName) {
+    public IdentityResponse getIdentity(final String element, final String id) {
         // TODO impl elementId and elementName
         final String identityId = String.format("%s%s", dgcProperties.getServiceUrl(), IDENTITY_PATH);
 

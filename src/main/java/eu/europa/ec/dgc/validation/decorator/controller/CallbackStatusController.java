@@ -37,7 +37,9 @@ public class CallbackStatusController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "OK"),
         @ApiResponse(responseCode = "401", description = "Unauthorized, if Result Token was not correctly signed"),
-        @ApiResponse(responseCode = "410", description = "Gone. Subject does not exist anymore")
+        @ApiResponse(responseCode = "404", description = "Not Found"),
+        @ApiResponse(responseCode = "410", description = "Gone. Subject does not exist anymore"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     @PutMapping(value = "/callback/{subject}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void callback() {

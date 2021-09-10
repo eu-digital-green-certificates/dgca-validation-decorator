@@ -37,15 +37,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class IdentityController {
 
-    private static final String PATH = "/identity/{elementName}/{elementId}";
+    private static final String PATH = "/identity/{element}/{id}";
 
     private final IdentityService identityService;
     
     /**
      * Delivers a JSON description of public keys and endpoints.
      * 
-     * @param elementName Name of element
-     * @param elementId ID of element
+     * @param element Name of element
+     * @param id ID of element
      * @return {@link IdentityResponse}
      */
     @Operation(summary = "The identity document endpoint delivers a JSON description of public keys and endpoints", 
@@ -59,10 +59,10 @@ public class IdentityController {
     })
     @GetMapping(value = PATH, produces = MediaType.APPLICATION_JSON_VALUE)
     public IdentityResponse identity(
-            @PathVariable(name = "elementName", required = true) String elementName,
-            @PathVariable(name = "elementId", required = false) String elementId) {
-        log.debug("Incoming GET request to '{}' with element name '{}' and element id '{}'", 
-                PATH, elementName, elementId);
-        return identityService.getIdentity(elementId, elementName);
+            @PathVariable(name = "element", required = true) String element,
+            @PathVariable(name = "id", required = false) String id) {
+        log.debug("Incoming GET request to '{}' with element '{}' and id '{}'", PATH, element, id);
+        
+        return identityService.getIdentity(element, id);
     }
 }

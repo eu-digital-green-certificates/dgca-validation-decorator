@@ -1,6 +1,6 @@
 /*-
  * ---license-start
- * EU Digital Green Certificate Issuance Service / dgca-issuance-service
+ * European Digital COVID Certificate Validation Decorator Service / dgca-validation-decorator
  * ---
  * Copyright (C) 2021 T-Systems International GmbH and all other contributors
  * ---

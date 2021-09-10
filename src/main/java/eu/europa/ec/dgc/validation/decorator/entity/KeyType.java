@@ -24,5 +24,5 @@ public enum KeyType {
     
     ValidationServiceEncKey, 
     
-    ValidationServiceSignKey
+    ValidationServiceSignKey;
 }

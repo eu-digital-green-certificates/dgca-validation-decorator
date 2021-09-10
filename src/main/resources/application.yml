@@ -5,13 +5,21 @@ identity:
   serviceIdentityUrl: https://serviceprovider/
   #### validationIdentity
   validationIdentityUrl: https://validation.serviceprovider/
+  consent: I want to check your DCC to confirm your booking! :)
   servicePovider: Service Provider.com
+  restTemplate:
+    connectionTimeout: 3000
+    readTimeout: 3000
 
 token:
-  algorithm: EC
+  type: JWT
+  algorithm: ES
   keysize: 256
+  issuer: Validation Decorator Dervice
+  validity: 3600 #### in seconds. Expiration is calculated
   publicKey: MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEIPrtYsW9+Juwp/mt7h8FJ3LgFRIUl2Vlmcl1DUm5gNHl0LnHIL4Jff6mg6yVhehdQiMvkhUtTvmFIUWONSJEnw==
   privateKey: MEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCBSuPIbykwH24sjQsTneeN6EyjiA1NK5W7uca+HxmGmWw==
+  keyAlgorithm: EC
 
 dgc:
   businessRulesDownload:
@@ -34,6 +42,8 @@ server:
 spring:
   application:
     name: dgca-validation-decorator
+  profiles:
+    active: keys
 
 management:
   endpoint:

@@ -31,22 +31,24 @@ public class InitializeService {
 
     private final IdentityProperties properties;
 
+    private final AccessTokenService accessTokenService;
+
     /**
-     * Build data for QR code with given subject ID.
+     * Build data for QR code with given subject.
      * 
-     * @param subjectId Subject ID
+     * @param subject Subject
      * @return {@link QrCodeDto}
      */
-    public QrCodeDto getBySubject(String subjectId) {
-        // TODO create token
-        // TODO get/create consent
+    public QrCodeDto getBySubject(String subject) {
         return QrCodeDto.builder()
                 .protocol(properties.getProtocol())
                 .protocolVersion(properties.getProtocolVersion())
                 .serviceIdentity(properties.getServiceIdentityUrl())
-                .validationIdentity(properties.getValidationIdentityUrl())
-                .subject(subjectId)
+                //.validationIdentity(properties.getValidationIdentityUrl())
+                .token(accessTokenService.buildAccessToken(subject))
+                .consent(properties.getConsent())
+                .subject(subject)
                 .servicePovider(properties.getServicePovider())
                 .build();
-    }
+    }    
 }

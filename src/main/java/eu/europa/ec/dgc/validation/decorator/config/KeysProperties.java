@@ -20,36 +20,40 @@
 
 package eu.europa.ec.dgc.validation.decorator.config;
 
-import io.jsonwebtoken.SignatureAlgorithm;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Data
 @Configuration
-@ConfigurationProperties("token")
-public class TokenProperties {
+@ConfigurationProperties(prefix = "keys")
+public class KeysProperties {
 
-    public static final String ALGORITHM_ELLIPTIC_CURVE = "ES";
-    
-    private String type;
-    
-    private String algorithm;
+    private List<ServiceProperties> verificationMethods = new ArrayList<>();
 
-    private int keysize;
+    private List<ServiceProperties> services = new ArrayList<>();
 
-    private String issuer;
-    
-    private int validity; 
-    
-    private String publicKey;
+    @Data
+    public static final class ServiceProperties {
 
-    private String privateKey;
-    
-    private String keyAlgorithm;
+        private String id;
 
-    public SignatureAlgorithm getSignatureAlgorithm() {
-        String name = String.format("%s%d", algorithm.toUpperCase(), keysize);
-        return SignatureAlgorithm.forName(name);        
+        private String type;
+
+        private String controller;
+
+        private PublicKeyJwkProperties publicKeyJwk;
+    }
+
+    @Data
+    public static final class PublicKeyJwkProperties {
+
+        private String x5c;
+
+        private String kid;
+
+        private String alg;
     }
 }

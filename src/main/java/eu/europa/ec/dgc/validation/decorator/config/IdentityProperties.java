@@ -37,5 +37,7 @@ public class IdentityProperties {
     
     private String validationIdentityUrl;
     
+    private String consent;
+    
     private String servicePovider;
 }

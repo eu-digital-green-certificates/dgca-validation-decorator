@@ -18,30 +18,40 @@
  * ---license-end
  */
 
-package eu.europa.ec.dgc.validation.decorator.exception;
+package eu.europa.ec.dgc.validation.decorator.entity;
 
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.Data;
 
-public class DccException extends RuntimeException {
-
-    @Getter
-    private int status = 500;
-
-    public DccException(String message, Throwable inner) {
-        super(message, inner);
+@Data
+public class ValidationServiceIdentityResponse {
+    
+    private String id;
+    
+    private List<VerificationMethod> verificationMethod = new ArrayList<>();
+    
+    @Data
+    public static final class VerificationMethod {
+        
+        private String id;
+        
+        private String type;
+        
+        private String controller;
+        
+        @JsonProperty("publicKeyJWK")
+        private PublicKeyJwk publicKeyJwk;
     }
-
-    public DccException(String message) {
-        super(message);
-    }
-
-    public DccException(String message, Throwable inner, int status) {
-        super(message, inner);
-        this.status = status;
-    }
-
-    public DccException(String message, int status) {
-        super(message);
-        this.status = status;
+    
+    @Data
+    public static final class PublicKeyJwk {
+        
+        private String x5c;
+        
+        private String kid;
+        
+        private String alg;
     }
 }

@@ -20,28 +20,13 @@
 
 package eu.europa.ec.dgc.validation.decorator.exception;
 
-import lombok.Getter;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-public class DccException extends RuntimeException {
+@ResponseStatus(value = HttpStatus.NOT_IMPLEMENTED)
+public class NotImplementedException extends RuntimeException {
 
-    @Getter
-    private int status = 500;
-
-    public DccException(String message, Throwable inner) {
-        super(message, inner);
-    }
-
-    public DccException(String message) {
+    public NotImplementedException(String message) {
         super(message);
-    }
-
-    public DccException(String message, Throwable inner, int status) {
-        super(message, inner);
-        this.status = status;
-    }
-
-    public DccException(String message, int status) {
-        super(message);
-        this.status = status;
     }
 }

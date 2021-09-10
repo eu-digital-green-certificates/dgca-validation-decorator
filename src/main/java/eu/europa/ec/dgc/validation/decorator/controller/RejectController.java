@@ -20,27 +20,47 @@
 
 package eu.europa.ec.dgc.validation.decorator.controller;
 
+import eu.europa.ec.dgc.validation.decorator.service.AccessTokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.springframework.http.MediaType;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
-@RequestMapping("/")
-public class RejectCallbackController {
+@RequiredArgsConstructor
+public class RejectController {
 
-    @Operation(summary = "TODO", description = "TODO")
+    private static final String PATH = "/reject";
+
+    private final AccessTokenService accessTokenService;
+
+    /**
+     * Cancels a DCC validation.
+     * 
+     * @param token Authorization Token
+     * @return {@link ResponseEntity}
+     */
+    @Operation(summary = "Cancels a DCC validation", description = "Cancels a DCC validation")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "OK"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized, if no access token are provided")
+        @ApiResponse(responseCode = "401", description = "Unauthorized, if no access token are provided"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     })
-    @GetMapping(value = "/reject", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void reject(
-            @RequestHeader("Authorization") String accessToken) {
-        // TODO impl
+    @GetMapping(value = "/reject")
+    public ResponseEntity reject(@RequestHeader("Authorization") String token) {
+        log.debug("Incoming GET request to '{}' with token '{}'", PATH, token);
+        log.info("This is a demo request that currently has no function.");
+
+        if (accessTokenService.isValid(token)) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 }

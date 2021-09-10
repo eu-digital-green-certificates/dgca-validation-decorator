@@ -18,30 +18,22 @@
  * ---license-end
  */
 
-package eu.europa.ec.dgc.validation.decorator.exception;
+package eu.europa.ec.dgc.validation.decorator.entity;
 
-import lombok.Getter;
+import javax.validation.constraints.NotNull;
+import lombok.Data;
 
-public class DccException extends RuntimeException {
+@Data
+public class ValidationServiceInitializeResponse {
 
-    @Getter
-    private int status = 500;
+    // Hexadecimal-encoded value.
+    @NotNull
+    private String subject;
 
-    public DccException(String message, Throwable inner) {
-        super(message, inner);
-    }
+    // Number of seconds since January. 1, 1970.
+    private long exp;
 
-    public DccException(String message) {
-        super(message);
-    }
-
-    public DccException(String message, Throwable inner, int status) {
-        super(message, inner);
-        this.status = status;
-    }
-
-    public DccException(String message, int status) {
-        super(message);
-        this.status = status;
-    }
+    // Validation URL.
+    @NotNull
+    private String aud;
 }
