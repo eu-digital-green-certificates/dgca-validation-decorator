@@ -11,6 +11,15 @@ identity:
     connectionTimeout: 3000
     readTimeout: 3000
 
+booking:
+  urls:
+    boardingPass: http://localhost:8082/boardingpass/{subject}
+    tokenContent: http://localhost:8082/tokencontent/{subject}
+
+validation:
+  urls:
+    status: http://localhost:8081/status/{subject}
+
 token:
   type: JWT
   algorithm: ES

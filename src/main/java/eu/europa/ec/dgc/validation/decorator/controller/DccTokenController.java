@@ -27,6 +27,7 @@ import eu.europa.ec.dgc.validation.decorator.service.DccTokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import java.util.Map;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,7 @@ public class DccTokenController {
 
     /**
      * Returns an access token for the validation service which contains the information of the booking session.
+     * 
      * @param token JWT
      * @param dccToken {@link DccTokenRequest}
      * @return {@link AccessTokenPayload}
@@ -64,15 +66,21 @@ public class DccTokenController {
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     })
-    @PostMapping(value = PATH, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = PATH, 
+        consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<AccessTokenPayload> token(
-            @RequestHeader("Authorization") String token,
-            @Valid @RequestBody DccTokenRequest dccToken) {
+            @RequestHeader("Authorization") final String token,
+            @Valid @RequestBody final DccTokenRequest dccToken) {
         log.debug("Incoming POST request to '{}' with content '{}' and token '{}'", PATH, dccToken, token);
 
         if (accessTokenService.isValid(token)) {
-            final AccessTokenPayload accessTocken = dccTokenService.getAccessTockenForValidationService(dccToken);
-            return ResponseEntity.ok(accessTocken);
+            final Map<String, String> tokenContent = accessTokenService.parseAccessToken(token);
+            if (tokenContent.containsKey("sub") && tokenContent.get("sub") != null) {
+                final String subject = tokenContent.get("sub");
+                final AccessTokenPayload accessTocken = dccTokenService
+                        .getAccessTockenForValidationService(dccToken, subject);
+                return ResponseEntity.ok(accessTocken);
+            }
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }

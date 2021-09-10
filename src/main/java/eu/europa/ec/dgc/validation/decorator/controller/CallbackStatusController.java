@@ -20,18 +20,29 @@
 
 package eu.europa.ec.dgc.validation.decorator.controller;
 
+import eu.europa.ec.dgc.validation.decorator.exception.NotImplementedException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
-@RequestMapping("/")
+@RequiredArgsConstructor
 public class CallbackStatusController {
 
+    private static final String PATH = "/callback/{subject}";
+
+    /**
+     * Callback endpoint receives the validation result to a subject.
+     * 
+     * @param subject Subject
+     */
     @Operation(summary = "The optional callback endpoint receives the validation result to a subject", 
             description = "The optional callback endpoint receives the validation result to a subject")
     @ApiResponses(value = {
@@ -41,8 +52,10 @@ public class CallbackStatusController {
         @ApiResponse(responseCode = "410", description = "Gone. Subject does not exist anymore"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    @PutMapping(value = "/callback/{subject}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void callback() {
+    @PutMapping(value = PATH, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void callback(@PathVariable(value = "subject", required = true) final String subject) {
+        log.debug("Incoming PUT request to '{}' with subject '{}'", PATH, subject);
         // TODO impl
+        throw new NotImplementedException("Callback is currently not implemented");
     }
 }

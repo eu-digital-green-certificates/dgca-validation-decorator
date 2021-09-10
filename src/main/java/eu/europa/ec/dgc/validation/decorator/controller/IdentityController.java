@@ -59,8 +59,8 @@ public class IdentityController {
     })
     @GetMapping(value = PATH, produces = MediaType.APPLICATION_JSON_VALUE)
     public IdentityResponse identity(
-            @PathVariable(name = "element", required = true) String element,
-            @PathVariable(name = "id", required = false) String id) {
+            @PathVariable(name = "element", required = true) final String element,
+            @PathVariable(name = "id", required = false) final String id) {
         log.debug("Incoming GET request to '{}' with element '{}' and id '{}'", PATH, element, id);
         
         return identityService.getIdentity(element, id);

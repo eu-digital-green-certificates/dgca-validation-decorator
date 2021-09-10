@@ -24,12 +24,17 @@ import eu.europa.ec.dgc.validation.decorator.config.KeysProperties;
 import eu.europa.ec.dgc.validation.decorator.config.KeysProperties.ServiceProperties;
 import eu.europa.ec.dgc.validation.decorator.dto.AccessTokenPayload;
 import eu.europa.ec.dgc.validation.decorator.dto.DccTokenRequest;
-import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceIdentityResponse;
+import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceBoardingPassResponse;
+import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceTokenContentResponse;
+import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceInitializeResponse;
 import eu.europa.ec.dgc.validation.decorator.exception.NotFoundException;
+import eu.europa.ec.dgc.validation.decorator.repository.BookingServiceRepository;
 import eu.europa.ec.dgc.validation.decorator.repository.ValidationServiceRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DccTokenService {
@@ -38,15 +43,28 @@ public class DccTokenService {
 
     private final ValidationServiceRepository validationServiceRepository;
 
+    private final BookingServiceRepository bookingServiceRepository;
+
     /**
      * Request validation- and booking service to create token.
      * 
      * @param dccToken {@link DccTokenRequest}
      * @return {@link AccessTokenPayload}
      */
-    public AccessTokenPayload getAccessTockenForValidationService(DccTokenRequest dccToken) {
+    public AccessTokenPayload getAccessTockenForValidationService(
+            final DccTokenRequest dccToken, final String subject) {
         final ServiceProperties service = getServicePropertiesById(dccToken.getService());
-        ValidationServiceIdentityResponse identity = validationServiceRepository.identity(service);
+
+        final ValidationServiceInitializeResponse initialize = validationServiceRepository
+                .initialize(service, dccToken, subject);
+        log.debug("validation service initialize: {}", initialize);
+
+        final BookingServiceBoardingPassResponse boardingPass = bookingServiceRepository.boardingPass(subject);
+        log.debug("booking service boarding pass: {}", boardingPass);
+
+        final BookingServiceTokenContentResponse tokenContent = bookingServiceRepository.tokenContent(subject);
+        log.debug("booking service token content: {}", tokenContent);
+        
         // TODO impl
         return null;
     }

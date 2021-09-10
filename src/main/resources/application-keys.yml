@@ -20,7 +20,7 @@ keys:
     #### Public key of the key pair of the validation provider to sign the result token
     - id: ValidationServiceSignKey-1
       type: JsonWebKey2020
-      controller: http://localhost:8081/identity #### https://validation-service.de/identity
+      controller: http://localhost:8081/initialize #### https://validation-service.de/identity
       publicKeyJwk:
         x5c: MIIBNDCB3KADAgECAgRhJeHLMAoGCCqGSM49BAMCMCMxITAfBgNVBAMMGFZhbGlkYXRpb25TZXJ2aWNlU2lnbktleTAeFw0yMTA4MjUwNjIzMDdaFw0yMjA4MjUwNjIzMDdaMCMxITAfBgNVBAMMGFZhbGlkYXRpb25TZXJ2aWNlU2lnbktleTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABIMdlvwpEPWmbrhAZLOZm6NGyCQofFbpE1EfYK9i+kLpmwDgAtc99zoZg9d2oZtpC9zNLs71cncpJSkqpST1HKEwCgYIKoZIzj0EAwIDRwAwRAIgct73rVroQYuxpZS/Y/awVrceBjAOvFqmxDr07Y8BBqsCIBjH9085RqVzFfZsdO9Y9YazZ1q0+oqmwl7ypT2xWEoU
         kid: RAM2Stw7EkE=
