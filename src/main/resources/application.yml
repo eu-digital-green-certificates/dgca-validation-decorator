@@ -38,21 +38,16 @@ dgc:
     timeInterval: 1800000
     lockLimit: 3600000
   serviceUrl: http://localhost:8080
-  #keyStoreFile: certs/dev-decorator.jks
-  #keyStorePassword: changeMe
-  #privateKeyPassword: changeMe
-  keyStoreFile: certs/dev-test.jks
-  keyStorePassword: dcc
-  privateKeyPassword: dcc
-  activeSignKey: validationservicesignkey
+  keyStoreFile: certs/dev-decorator.jks
+  keyStorePassword: changeMe
+  privateKeyPassword: changeMe  
+  activeSignKey: validationdecoratorsignkey
   encAliases: 
-    #- validationdecoratorenckey
-    - validationserviceenckey
+    - validationdecoratorenckey
   signAliases: 
-    #- validationdecoratorsignkey
-    - validationservicesignkey
+    - validationdecoratorsignkey
   token:
-    provider: config
+    provider: config #### use "ks" (keyStore) or "config"
     issuer: Validation Decorator Dervice
     type: JWT
     algorithm: ES

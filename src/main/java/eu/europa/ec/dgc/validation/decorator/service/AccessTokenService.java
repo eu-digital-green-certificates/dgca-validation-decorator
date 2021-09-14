@@ -22,6 +22,7 @@ package eu.europa.ec.dgc.validation.decorator.service;
 
 import eu.europa.ec.dgc.validation.decorator.config.DgcProperties;
 import eu.europa.ec.dgc.validation.decorator.exception.DccException;
+import eu.europa.ec.dgc.validation.decorator.exception.NotImplementedException;
 import eu.europa.ec.dgc.validation.decorator.exception.UncheckedInvalidKeySpecException;
 import eu.europa.ec.dgc.validation.decorator.exception.UncheckedNoSuchAlgorithmException;
 import io.jsonwebtoken.Claims;
@@ -39,7 +40,6 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -50,6 +50,10 @@ public class AccessTokenService {
 
     public static final String TOKEN_PREFIX = "Bearer ";
 
+    private static final String KEY_PROVIDER = "ks";
+
+    private static final String CONFIG_PROVIDER = "config";
+
     private final DgcProperties properties;
 
     private final KeyProvider keyProvider;
@@ -57,18 +61,32 @@ public class AccessTokenService {
     /**
      * This token is generated to access the Validation Decorator endpoints.
      * 
+     * @param subject Subject
+     * @return {@link String} JWT token
+     */
+    public String buildHeaderToken(String subject) {
+        return String.format("%s%s", TOKEN_PREFIX, buildAccessToken(subject));
+    }
+
+    /**
+     * This token is generated to access the Validation Decorator endpoints.
+     * 
+     * @param subject Subject
      * @return {@link String} JWT token
      */
     public String buildAccessToken(final String subject) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("sub", subject);
-        // TODO The kid should be calculated as the first 8 bytes of the SHA256 Fingerprint of the X5C content.
         return getAccessTokenBuilder()
-                .addClaims(claims)
-                .setHeaderParam("kid", "TODO")
+                .addClaims(Collections.singletonMap("sub", subject))
                 .compact();
     }
 
+    /**
+     * This token is generated an default access token without claims.
+     */
+    public String buildHeaderToken() {
+        return String.format("%s%s", TOKEN_PREFIX, buildAccessToken());
+    }
+    
     /**
      * This token is generated an default access token without claims.
      */
@@ -84,7 +102,7 @@ public class AccessTokenService {
      * @return {@link Map} with {@link String} as key and {@link String} as value
      */
     public Map<String, String> parseAccessToken(String token) {
-        final String tokenContent = token.startsWith(TOKEN_PREFIX) ? token.replace(TOKEN_PREFIX, "") : token;        
+        final String tokenContent = token.startsWith(TOKEN_PREFIX) ? token.replace(TOKEN_PREFIX, "") : token;
         final Jws<Claims> parsedToken = Jwts.parser()
                 .setSigningKey(this.getPublicKey())
                 .requireIssuer(properties.getToken().getIssuer())
@@ -120,10 +138,11 @@ public class AccessTokenService {
         return Jwts.builder()
                 .signWith(properties.getToken().getSignatureAlgorithm(), this.getPrivateKey())
                 .setHeaderParam("typ", properties.getToken().getType())
+                .setHeaderParam("kid", this.getKeyId())
                 .setIssuer(properties.getToken().getIssuer())
                 .setExpiration(new Date(Instant.now().plusSeconds(properties.getToken().getValidity()).toEpochMilli()));
     }
-    
+
     private PublicKey parsePublicKey(String privateKeyBase64) {
         try {
             final byte[] keyBytes = Base64.getDecoder().decode(privateKeyBase64);
@@ -149,18 +168,38 @@ public class AccessTokenService {
             throw new UncheckedInvalidKeySpecException(e);
         }
     }
-    
+
     private String getKeyAlgorithm() {
         return properties.getToken().getKeyAlgorithm();
-    }    
-    
-    private PublicKey getPublicKey() {
-        // TODO final Certificate cert = keyProvider.receiveCertificate(keyProvider.getActiveSignKey());
-        return this.parsePublicKey(this.properties.getToken().getPublicKey());
     }
-    
+
+    private String getKeyId() {
+        if (CONFIG_PROVIDER.equalsIgnoreCase(this.properties.getToken().getProvider())) {
+            return "config";
+        } else if (KEY_PROVIDER.equalsIgnoreCase(this.properties.getToken().getProvider())) {
+            return keyProvider.getKid(keyProvider.getActiveSignKey());
+        }
+        throw new NotImplementedException(String
+                .format("Token provider '%s' not implemented", this.properties.getToken().getProvider()));
+    }
+
+    private PublicKey getPublicKey() {
+        if (CONFIG_PROVIDER.equalsIgnoreCase(this.properties.getToken().getProvider())) {
+            return this.parsePublicKey(this.properties.getToken().getPublicKey());
+        } else if (KEY_PROVIDER.equalsIgnoreCase(this.properties.getToken().getProvider())) {
+            return keyProvider.receiveCertificate(keyProvider.getActiveSignKey()).getPublicKey();
+        }
+        throw new NotImplementedException(String
+                .format("Token provider '%s' not implemented", this.properties.getToken().getProvider()));
+    }
+
     private PrivateKey getPrivateKey() {
-        // TODO final PrivateKey privateKey = keyProvider.receivePrivateKey(keyProvider.getActiveSignKey());
-        return this.parsePrivateKey(this.properties.getToken().getPrivateKey());
+        if (CONFIG_PROVIDER.equalsIgnoreCase(this.properties.getToken().getProvider())) {
+            return this.parsePrivateKey(this.properties.getToken().getPrivateKey());
+        } else if (KEY_PROVIDER.equalsIgnoreCase(this.properties.getToken().getProvider())) {
+            return keyProvider.receivePrivateKey(keyProvider.getActiveSignKey());
+        }
+        throw new NotImplementedException(String
+                .format("Token provider '%s' not implemented", this.properties.getToken().getProvider()));
     }
 }

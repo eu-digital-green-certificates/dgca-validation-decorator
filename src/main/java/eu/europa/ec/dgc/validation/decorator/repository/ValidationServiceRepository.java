@@ -22,6 +22,7 @@ package eu.europa.ec.dgc.validation.decorator.repository;
 
 import eu.europa.ec.dgc.validation.decorator.config.DgcProperties.ServiceProperties;
 import eu.europa.ec.dgc.validation.decorator.dto.DccTokenRequest;
+import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceIdentityResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceInitializeRequest;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceInitializeResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceStatusResponse;
@@ -62,18 +63,18 @@ public class ValidationServiceRepository {
 
     private final AccessTokenService accessTokenService;
 
-    //    /**
-    //     * Validation service identity endpoint. 
-    //     * Example: https://dgca-validation-service-eu-test.cfapps.eu10.hana.ondemand.com/.
-    //     * 
-    //     * @return {@link ValidationServiceIdentityResponse}
-    //     */
-    //    public ValidationServiceIdentityResponse identity() {
-    //        final String url = this.identityUrl;
-    //        final ResponseEntity<ValidationServiceIdentityResponse> response = restTpl
-    //                .getForEntity(url, ValidationServiceIdentityResponse.class);
-    //        return response.getBody();
-    //    }
+    /**
+     * Validation service identity endpoint. Example:
+     * https://dgca-validation-service-eu-test.cfapps.eu10.hana.ondemand.com/.
+     * 
+     * @return {@link ValidationServiceIdentityResponse}
+     */
+    public ValidationServiceIdentityResponse identity() {
+        final String url = this.identityUrl;
+        final ResponseEntity<ValidationServiceIdentityResponse> response = restTpl
+                .getForEntity(url, ValidationServiceIdentityResponse.class);
+        return response.getBody();
+    }
 
     /**
      * Validation service initialize endpoint.
@@ -97,8 +98,7 @@ public class ValidationServiceRepository {
 
         final HttpHeaders headers = new HttpHeaders();
         headers.add("X-Version", "1.0");
-        headers.add("Authorization", String.format("%s %s",
-                AccessTokenService.TOKEN_PREFIX, accessTokenService.buildAccessToken(subject)));
+        headers.add("Authorization", accessTokenService.buildHeaderToken(subject));
 
         final HttpEntity<ValidationServiceInitializeRequest> entity = new HttpEntity<>(body, headers);
 
@@ -120,7 +120,7 @@ public class ValidationServiceRepository {
 
         final HttpHeaders headers = new HttpHeaders();
         headers.add("X-Version", "1.0");
-        headers.add("Authorization", accessTokenService.buildAccessToken());
+        headers.add("Authorization", accessTokenService.buildHeaderToken(subject));
 
         final HttpEntity<String> entity = new HttpEntity<>(headers);
 
@@ -146,7 +146,7 @@ public class ValidationServiceRepository {
 
         final HttpHeaders headers = new HttpHeaders();
         headers.add("X-Version", "1.0");
-        headers.add("Authorization", accessTokenService.buildAccessToken());
+        headers.add("Authorization", accessTokenService.buildHeaderToken(subject));
 
         // TODO add body DccValidationRequest
 

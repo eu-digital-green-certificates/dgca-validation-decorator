@@ -62,7 +62,7 @@ public class BookingServiceRepository {
         final String url = this.boardingPassUrl.replace(PLACEHOLDER_SUBJECT, subject);
 
         final HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", accessTokenService.buildAccessToken());
+        headers.add("Authorization", accessTokenService.buildHeaderToken(subject));
 
         final HttpEntity<String> entity = new HttpEntity<>(headers);
 
@@ -81,7 +81,7 @@ public class BookingServiceRepository {
         final String url = this.tokenContentUrl.replace(PLACEHOLDER_SUBJECT, subject);
 
         final HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", accessTokenService.buildAccessToken());
+        headers.add("Authorization", accessTokenService.buildHeaderToken(subject));
 
         final HttpEntity<String> entity = new HttpEntity<>(headers);
 
@@ -100,7 +100,7 @@ public class BookingServiceRepository {
         final String url = this.resultUrl.replace(PLACEHOLDER_SUBJECT, subject);
 
         final HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", accessTokenService.buildAccessToken());
+        headers.add("Authorization", accessTokenService.buildHeaderToken(subject));
 
         final HttpEntity<BookingServiceResultRequest> entity = new HttpEntity<>(request, headers);
 
