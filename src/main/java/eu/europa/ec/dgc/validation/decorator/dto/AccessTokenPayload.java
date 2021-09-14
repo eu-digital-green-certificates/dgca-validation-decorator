@@ -27,7 +27,6 @@ import lombok.Data;
 @Data
 public class AccessTokenPayload {
 
-    @JsonProperty("Jti")
     private String jti;
 
     private String iss;
@@ -36,18 +35,34 @@ public class AccessTokenPayload {
 
     private String sub;
 
+    private String aud;
+
     private long exp;
 
+    // TODO change to enum?
+    // 0 = Structure / Validates just the Content of the DCC (Schema, Values, CBOR Structure)
+    // 1 = Cryptographic / Structure Validation + Signature Validation
+    // 2 = Full / Structure Validation + Cryptographic + Business Rule Check (condition structure necessary necessary)
+    // WRITE_ENUMS_USING_INDEX
+    @JsonProperty("t")
     private int type;
 
+    @JsonProperty("v")
     private String version;
 
+    @JsonProperty("vc")
     private AccessTokenConditions conditions;
+
+    //    public static enum Type {
+    //        STRUCTURE,
+    //        CRYPTOGRAPHIC,
+    //        FULL;
+    //    }
 
     @Data
     public static final class AccessTokenConditions {
 
-        // Hash of the dcc. Not applicable for Type 1,2.
+        // Hash of the DCC. Not applicable for Type 1,2.
         private String hash;
 
         // Selected language.
@@ -62,7 +77,7 @@ public class AccessTokenPayload {
         // Date of birth.
         private String dob;
 
-        // Contry of Arrival.
+        // Country of Arrival.
         private String coa;
 
         // Country of Departure.

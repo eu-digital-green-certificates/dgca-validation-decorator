@@ -20,12 +20,13 @@
 
 package eu.europa.ec.dgc.validation.decorator.service;
 
-import eu.europa.ec.dgc.validation.decorator.config.TokenProperties;
+import eu.europa.ec.dgc.validation.decorator.config.DgcProperties;
 import eu.europa.ec.dgc.validation.decorator.exception.DccException;
 import eu.europa.ec.dgc.validation.decorator.exception.UncheckedInvalidKeySpecException;
 import eu.europa.ec.dgc.validation.decorator.exception.UncheckedNoSuchAlgorithmException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -38,6 +39,7 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -46,9 +48,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AccessTokenService {
 
-    private static final String TOKEN_PREFIX = "Bearer ";
+    public static final String TOKEN_PREFIX = "Bearer ";
 
-    private final TokenProperties properties;
+    private final DgcProperties properties;
+
+    private final KeyProvider keyProvider;
 
     /**
      * This token is generated to access the Validation Decorator endpoints.
@@ -56,12 +60,20 @@ public class AccessTokenService {
      * @return {@link String} JWT token
      */
     public String buildAccessToken(final String subject) {
-        return Jwts.builder()
-                .signWith(properties.getSignatureAlgorithm(), parsePrivateKey(properties.getPrivateKey()))
-                .setHeaderParam("typ", properties.getType())
-                .setIssuer(properties.getIssuer())
-                .setExpiration(new Date(Instant.now().plusSeconds(properties.getValidity()).toEpochMilli()))
-                .addClaims(Collections.singletonMap("sub", subject))
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("sub", subject);
+        // TODO The kid should be calculated as the first 8 bytes of the SHA256 Fingerprint of the X5C content.
+        return getAccessTokenBuilder()
+                .addClaims(claims)
+                .setHeaderParam("kid", "TODO")
+                .compact();
+    }
+
+    /**
+     * This token is generated an default access token without claims.
+     */
+    public String buildAccessToken() {
+        return getAccessTokenBuilder()
                 .compact();
     }
 
@@ -72,10 +84,10 @@ public class AccessTokenService {
      * @return {@link Map} with {@link String} as key and {@link String} as value
      */
     public Map<String, String> parseAccessToken(String token) {
-        final String tokenContent = token.startsWith(TOKEN_PREFIX) ? token.replace(TOKEN_PREFIX, "") : token;
+        final String tokenContent = token.startsWith(TOKEN_PREFIX) ? token.replace(TOKEN_PREFIX, "") : token;        
         final Jws<Claims> parsedToken = Jwts.parser()
-                .setSigningKey(parsePublicKey(properties.getPublicKey()))
-                .requireIssuer(properties.getIssuer())
+                .setSigningKey(this.getPublicKey())
+                .requireIssuer(properties.getToken().getIssuer())
                 .parseClaimsJws(tokenContent);
         final Claims body = parsedToken.getBody();
         if (!body.containsKey("sub")) {
@@ -104,11 +116,19 @@ public class AccessTokenService {
         }
     }
 
+    private JwtBuilder getAccessTokenBuilder() {
+        return Jwts.builder()
+                .signWith(properties.getToken().getSignatureAlgorithm(), this.getPrivateKey())
+                .setHeaderParam("typ", properties.getToken().getType())
+                .setIssuer(properties.getToken().getIssuer())
+                .setExpiration(new Date(Instant.now().plusSeconds(properties.getToken().getValidity()).toEpochMilli()));
+    }
+    
     private PublicKey parsePublicKey(String privateKeyBase64) {
         try {
             final byte[] keyBytes = Base64.getDecoder().decode(privateKeyBase64);
             final X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
-            final KeyFactory kf = KeyFactory.getInstance(properties.getKeyAlgorithm());
+            final KeyFactory kf = KeyFactory.getInstance(this.getKeyAlgorithm());
             return kf.generatePublic(spec);
         } catch (NoSuchAlgorithmException e) {
             throw new UncheckedNoSuchAlgorithmException(e);
@@ -121,12 +141,26 @@ public class AccessTokenService {
         try {
             final byte[] keyBytes = Base64.getDecoder().decode(privateKeyBase64);
             final PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
-            final KeyFactory kf = KeyFactory.getInstance(properties.getKeyAlgorithm());
+            final KeyFactory kf = KeyFactory.getInstance(this.getKeyAlgorithm());
             return kf.generatePrivate(spec);
         } catch (NoSuchAlgorithmException e) {
             throw new UncheckedNoSuchAlgorithmException(e);
         } catch (InvalidKeySpecException e) {
             throw new UncheckedInvalidKeySpecException(e);
         }
+    }
+    
+    private String getKeyAlgorithm() {
+        return properties.getToken().getKeyAlgorithm();
+    }    
+    
+    private PublicKey getPublicKey() {
+        // TODO final Certificate cert = keyProvider.receiveCertificate(keyProvider.getActiveSignKey());
+        return this.parsePublicKey(this.properties.getToken().getPublicKey());
+    }
+    
+    private PrivateKey getPrivateKey() {
+        // TODO final PrivateKey privateKey = keyProvider.receivePrivateKey(keyProvider.getActiveSignKey());
+        return this.parsePrivateKey(this.properties.getToken().getPrivateKey());
     }
 }

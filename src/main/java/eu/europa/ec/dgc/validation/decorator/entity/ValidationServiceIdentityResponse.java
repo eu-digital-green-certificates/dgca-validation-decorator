@@ -53,5 +53,7 @@ public class ValidationServiceIdentityResponse {
         private String kid;
         
         private String alg;
+        
+        private String use;
     }
 }

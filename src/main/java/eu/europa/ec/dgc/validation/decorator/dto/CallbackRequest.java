@@ -18,42 +18,35 @@
  * ---license-end
  */
 
-package eu.europa.ec.dgc.validation.decorator.config;
+package eu.europa.ec.dgc.validation.decorator.dto;
 
-import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 @Data
-@Configuration
-@ConfigurationProperties(prefix = "keys")
-public class KeysProperties {
+public class CallbackRequest {
 
-    private List<ServiceProperties> verificationMethods = new ArrayList<>();
-
-    private List<ServiceProperties> services = new ArrayList<>();
-
+    private String issuer;
+    
+    private int iat;
+    
+    private String sub;
+    
+    private String result;
+    
+    private String confirmation;
+    
+    private List<Result> results;
+    
     @Data
-    public static final class ServiceProperties {
-
-        private String id;
-
+    public static final class Result {
+        
+        private String identifier;
+        
+        private String result;
+        
         private String type;
-
-        private String controller;
-
-        private PublicKeyJwkProperties publicKeyJwk;
-    }
-
-    @Data
-    public static final class PublicKeyJwkProperties {
-
-        private String x5c;
-
-        private String kid;
-
-        private String alg;
+        
+        private String details;
     }
 }

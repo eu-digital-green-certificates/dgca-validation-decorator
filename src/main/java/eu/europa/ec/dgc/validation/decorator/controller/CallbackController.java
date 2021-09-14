@@ -20,24 +20,36 @@
 
 package eu.europa.ec.dgc.validation.decorator.controller;
 
-import eu.europa.ec.dgc.validation.decorator.exception.NotImplementedException;
+import eu.europa.ec.dgc.validation.decorator.dto.CallbackRequest;
+import eu.europa.ec.dgc.validation.decorator.service.AccessTokenService;
+import eu.europa.ec.dgc.validation.decorator.service.BookingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import java.util.Map;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-public class CallbackStatusController {
+public class CallbackController {
 
     private static final String PATH = "/callback/{subject}";
 
+    private final AccessTokenService accessTokenService;
+    
+    private final BookingService bookingService;
+    
     /**
      * Callback endpoint receives the validation result to a subject.
      * 
@@ -53,9 +65,21 @@ public class CallbackStatusController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     @PutMapping(value = PATH, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void callback(@PathVariable(value = "subject", required = true) final String subject) {
+    public ResponseEntity callback(
+            @PathVariable(value = "subject", required = true) final String subject,
+            @RequestHeader("Authorization") final String token,
+            @RequestHeader("X-Version") final String version, 
+            @Valid @RequestBody CallbackRequest request) {
         log.debug("Incoming PUT request to '{}' with subject '{}'", PATH, subject);
-        // TODO impl
-        throw new NotImplementedException("Callback is currently not implemented");
+        
+        if (accessTokenService.isValid(token)) {
+            final Map<String, String> tokenContent = accessTokenService.parseAccessToken(token);
+            if (tokenContent.containsKey("sub") && tokenContent.get("sub") != null) {
+                
+                bookingService.saveResult(subject, request);
+                return ResponseEntity.ok().build();
+            }
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 }

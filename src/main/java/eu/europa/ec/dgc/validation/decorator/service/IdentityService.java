@@ -23,15 +23,16 @@ package eu.europa.ec.dgc.validation.decorator.service;
 import eu.europa.ec.dgc.validation.decorator.config.DgcProperties;
 import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse;
 import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse.PublicKeyJwkIdentityResponse;
+import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse.ServiceIdentityResponse;
 import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse.VerificationIdentityResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.KeyType;
 import eu.europa.ec.dgc.validation.decorator.exception.DccException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -58,29 +59,47 @@ public class IdentityService {
      */
     public IdentityResponse getIdentity(final String element, final String id) {
         // TODO impl elementId and elementName
+
         final String identityId = String.format("%s%s", dgcProperties.getServiceUrl(), IDENTITY_PATH);
 
-        final List<VerificationIdentityResponse> verificationMethods = Stream.of(KeyType.values()).map(keyType -> {
-            final VerificationIdentityResponse verificationMethod = new VerificationIdentityResponse();
-            verificationMethod.setId(String.format("%s#%s-1", identityId, keyType.name()));
-            verificationMethod.setController(identityId);
-            verificationMethod.setType(VERIFICATION_TYPE);
-            verificationMethod.setPublicKeyJwk(buildPublicKey(keyType));
-            return verificationMethod;
-        }).collect(Collectors.toList());
+        final List<VerificationIdentityResponse> verificationMethods = keyProvider.getKeyNames(KeyType.ALL).stream()
+                .map(keyName -> {
+                    final VerificationIdentityResponse verificationMethod = new VerificationIdentityResponse();
+                    verificationMethod.setId(String.format("%s#%s", identityId, keyName));
+                    verificationMethod.setController(identityId);
+                    verificationMethod.setType(VERIFICATION_TYPE);
+                    verificationMethod.setPublicKeyJwk(buildPublicKey(keyName));
+                    return verificationMethod;
+                }).collect(Collectors.toList());
 
         final IdentityResponse identityResponse = new IdentityResponse();
         identityResponse.setId(identityId);
         identityResponse.setVerificationMethod(verificationMethods);
+        identityResponse.setService(getServices());
         return identityResponse;
     }
 
-    private PublicKeyJwkIdentityResponse buildPublicKey(KeyType keyType) {
-        final Certificate certificate = keyProvider.receiveCertificate(keyType);
+    private List<ServiceIdentityResponse> getServices() {
+        List<ServiceIdentityResponse> services = new ArrayList<>();
+        if (dgcProperties.getServices() != null) {
+            dgcProperties.getServices().stream().map(service -> {
+                ServiceIdentityResponse response = new ServiceIdentityResponse();
+                response.setId(service.getId());
+                response.setType(service.getType());
+                response.setServiceEndpoint(service.getServiceEndpoint());
+                response.setName(service.getName());
+                return response;
+            }).forEach(services::add);
+        }
+        return services;
+    }
+
+    private PublicKeyJwkIdentityResponse buildPublicKey(String keyName) {
+        final Certificate certificate = keyProvider.receiveCertificate(keyName);
         final PublicKeyJwkIdentityResponse publicKeyJwk = new PublicKeyJwkIdentityResponse();
         try {
             publicKeyJwk.setX5c(Base64.getEncoder().encodeToString(certificate.getEncoded()));
-            publicKeyJwk.setKid(keyProvider.getKid(keyType));
+            publicKeyJwk.setKid(keyProvider.getKid(keyName));
             publicKeyJwk.setAlg(PUBLIC_KEY_ALGORITM);
         } catch (CertificateEncodingException e) {
             throw new DccException("Can not encode certificate", e);
