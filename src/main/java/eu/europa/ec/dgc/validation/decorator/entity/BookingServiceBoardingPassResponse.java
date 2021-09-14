@@ -18,42 +18,27 @@
  * ---license-end
  */
 
-package eu.europa.ec.dgc.validation.decorator.config;
+package eu.europa.ec.dgc.validation.decorator.entity;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.OffsetDateTime;
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 @Data
-@Configuration
-@ConfigurationProperties(prefix = "keys")
-public class KeysProperties {
+public class BookingServiceBoardingPassResponse {
 
-    private List<ServiceProperties> verificationMethods = new ArrayList<>();
+    private String reference;
 
-    private List<ServiceProperties> services = new ArrayList<>();
+    private String confirmations;
 
+    private FlightInfoDto flightInfo;
+    
     @Data
-    public static final class ServiceProperties {
+    public static final class FlightInfoDto {
 
-        private String id;
+        private String from;
 
-        private String type;
+        private String to;
 
-        private String controller;
-
-        private PublicKeyJwkProperties publicKeyJwk;
-    }
-
-    @Data
-    public static final class PublicKeyJwkProperties {
-
-        private String x5c;
-
-        private String kid;
-
-        private String alg;
+        private OffsetDateTime time;
     }
 }

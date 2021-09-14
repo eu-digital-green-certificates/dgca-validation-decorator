@@ -37,10 +37,57 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class IdentityController {
 
-    private static final String PATH = "/identity/{element}/{id}";
+    private static final String PATH_ALL = "/identity";
+    
+    private static final String PATH_ELEMENT = "/identity/{element}";
+    
+    private static final String PATH_ELEMENT_ID = "/identity/{element}/{id}";
 
     private final IdentityService identityService;
+
+    /**
+     * Delivers a JSON description of public keys and endpoints.
+     * 
+     * @return {@link IdentityResponse}
+     */
+    @Operation(summary = "The identity document endpoint delivers a JSON description of public keys and endpoints", 
+            description = "The identity document endpoint delivers a JSON description of public keys and endpoints")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "OK"),
+        @ApiResponse(responseCode = "400", description = "Bad Request / Validation errors"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized, if no active session is attached"),
+        @ApiResponse(responseCode = "404", description = "Not Found"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error"),
+    })
+    @GetMapping(value = PATH_ALL, produces = MediaType.APPLICATION_JSON_VALUE)
+    public IdentityResponse identityAll() {
+        log.debug("Incoming GET request to '{}' with element '{}' and id '{}'", PATH_ALL);
+
+        return identityService.getIdentity(null, null);
+    }
     
+    /**
+     * Delivers a JSON description of public keys and endpoints.
+     * 
+     * @param element Name of element
+     * @return {@link IdentityResponse}
+     */
+    @Operation(summary = "The identity document endpoint delivers a JSON description of public keys and endpoints", 
+            description = "The identity document endpoint delivers a JSON description of public keys and endpoints")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "OK"),
+        @ApiResponse(responseCode = "400", description = "Bad Request / Validation errors"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized, if no active session is attached"),
+        @ApiResponse(responseCode = "404", description = "Not Found"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error"),
+    })
+    @GetMapping(value = PATH_ELEMENT, produces = MediaType.APPLICATION_JSON_VALUE)
+    public IdentityResponse identity(@PathVariable(name = "element", required = true) final String element) {
+        log.debug("Incoming GET request to '{}' with element '{}'", PATH_ELEMENT, element);
+
+        return identityService.getIdentity(element, null);
+    }
+
     /**
      * Delivers a JSON description of public keys and endpoints.
      * 
@@ -57,12 +104,12 @@ public class IdentityController {
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     })
-    @GetMapping(value = PATH, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = PATH_ELEMENT_ID, produces = MediaType.APPLICATION_JSON_VALUE)
     public IdentityResponse identity(
-            @PathVariable(name = "element", required = true) String element,
-            @PathVariable(name = "id", required = false) String id) {
-        log.debug("Incoming GET request to '{}' with element '{}' and id '{}'", PATH, element, id);
-        
+            @PathVariable(name = "element", required = true) final String element,
+            @PathVariable(name = "id", required = true) final String id) {
+        log.debug("Incoming GET request to '{}' with element '{}' and id '{}'", PATH_ELEMENT_ID, element, id);
+
         return identityService.getIdentity(element, id);
     }
 }

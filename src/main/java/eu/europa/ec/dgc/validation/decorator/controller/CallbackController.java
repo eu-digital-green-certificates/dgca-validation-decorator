@@ -20,10 +20,9 @@
 
 package eu.europa.ec.dgc.validation.decorator.controller;
 
-import eu.europa.ec.dgc.validation.decorator.dto.AccessTokenPayload;
-import eu.europa.ec.dgc.validation.decorator.dto.DccTokenRequest;
+import eu.europa.ec.dgc.validation.decorator.dto.CallbackRequest;
 import eu.europa.ec.dgc.validation.decorator.service.AccessTokenService;
-import eu.europa.ec.dgc.validation.decorator.service.DccTokenService;
+import eu.europa.ec.dgc.validation.decorator.service.BookingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -34,7 +33,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,43 +42,42 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-public class DccTokenController {
+public class CallbackController {
 
-    private static final String PATH = "/token";
+    private static final String PATH = "/callback/{subject}";
 
     private final AccessTokenService accessTokenService;
-
-    private final DccTokenService dccTokenService;
-
+    
+    private final BookingService bookingService;
+    
     /**
-     * Returns an access token for the validation service which contains the information of the booking session.
+     * Callback endpoint receives the validation result to a subject.
      * 
-     * @param token JWT
-     * @param dccToken {@link DccTokenRequest}
-     * @return {@link AccessTokenPayload}
+     * @param subject Subject
      */
-    @Operation(summary = "Access token for the validation service", 
-            description = "Access token for the validation service")
+    @Operation(summary = "The optional callback endpoint receives the validation result to a subject", 
+            description = "The optional callback endpoint receives the validation result to a subject")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "OK"),
-        @ApiResponse(responseCode = "400", description = "Bad Request / Validation errors"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized, if no access token was provided"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized, if Result Token was not correctly signed"),
         @ApiResponse(responseCode = "404", description = "Not Found"),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error"),
+        @ApiResponse(responseCode = "410", description = "Gone. Subject does not exist anymore"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    @PostMapping(value = PATH, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<AccessTokenPayload> token(
+    @PutMapping(value = PATH, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity callback(
+            @PathVariable(value = "subject", required = true) final String subject,
             @RequestHeader("Authorization") final String token,
-            @Valid @RequestBody final DccTokenRequest dccToken) {
-        log.debug("Incoming POST request to '{}' with content '{}' and token '{}'", PATH, dccToken, token);
-
+            @RequestHeader("X-Version") final String version, 
+            @Valid @RequestBody CallbackRequest request) {
+        log.debug("Incoming PUT request to '{}' with subject '{}'", PATH, subject);
+        
         if (accessTokenService.isValid(token)) {
             final Map<String, String> tokenContent = accessTokenService.parseAccessToken(token);
             if (tokenContent.containsKey("sub") && tokenContent.get("sub") != null) {
-                final String subject = tokenContent.get("sub");
-                final AccessTokenPayload accessTocken = dccTokenService
-                        .getAccessTockenForValidationService(dccToken, subject);
-                return ResponseEntity.ok(accessTocken);
+                
+                bookingService.saveResult(subject, request);
+                return ResponseEntity.ok().build();
             }
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

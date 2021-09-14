@@ -57,8 +57,9 @@ public class InitializeController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     })
     @GetMapping(value = PATH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public QrCodeDto initialize(@PathVariable(value = "subject", required = true) String subject) {
+    public QrCodeDto initialize(@PathVariable(value = "subject", required = true) final String subject) {
         log.debug("Incoming GET request to '{}' with subject '{}'", PATH, subject);
+        
         return initializeService.getBySubject(subject); 
     }
 }

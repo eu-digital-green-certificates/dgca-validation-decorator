@@ -1,6 +1,6 @@
 /*-
  * ---license-start
- * European Digital COVID Certificate Validation Decorator Service / dgca-validation-decorator
+ * European Digital COVID Certificate Booking Demo / dgca-booking-demo-backend
  * ---
  * Copyright (C) 2021 T-Systems International GmbH and all other contributors
  * ---
@@ -20,27 +20,18 @@
 
 package eu.europa.ec.dgc.validation.decorator.service;
 
-import eu.europa.ec.dgc.validation.decorator.entity.KeyType;
-import eu.europa.ec.dgc.validation.decorator.entity.KeyUse;
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
-import java.util.List;
+import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceStatusResponse;
+import eu.europa.ec.dgc.validation.decorator.repository.ValidationServiceRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
-public interface KeyProvider {
-
-    Certificate receiveCertificate(String keyName);
-
-    PrivateKey receivePrivateKey(String keyName);
-
-    String getKeyName(String kid);
-
-    List<String> getKeyNames(KeyType type);
-
-    String getKid(String keyName);
-
-    String getAlg(String keyName);
-
-    String getActiveSignKey();
-
-    KeyUse getKeyUse(String keyName);
+@Service
+@RequiredArgsConstructor
+public class ValidationStatusService {
+    
+    private final ValidationServiceRepository validationServiceRepository;
+    
+    public ValidationServiceStatusResponse determineStatus(String subject) {
+        return validationServiceRepository.status(subject);
+    }
 }

@@ -20,8 +20,11 @@
 
 package eu.europa.ec.dgc.validation.decorator.config;
 
+import io.jsonwebtoken.SignatureAlgorithm;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.convert.DurationUnit;
@@ -49,11 +52,63 @@ public class DgcProperties {
 
     private String privateKeyPassword;
 
+    private String activeSignKey;
+
+    private List<String> encAliases;
+
+    private List<String> signAliases;
+
+    private TokenProperties token;
+    
+    private List<ServiceProperties> services = new ArrayList<>();
+
     @Data
     public static final class GatewayDownload {
 
         private Integer timeInterval;
 
         private Integer lockLimit;
+    }
+
+    @Data
+    public static final class TokenProperties {
+
+        public static final String ALGORITHM_ELLIPTIC_CURVE = "ES";
+
+        // use "ks" (keyStore) or "config" 
+        private String provider;
+        
+        private String issuer;
+
+        private String type;
+
+        private String algorithm;
+
+        private int keysize;
+
+        private int validity;
+        
+        private String publicKey;
+        
+        private String privateKey;
+        
+        private String keyAlgorithm;
+
+        public SignatureAlgorithm getSignatureAlgorithm() {
+            final String name = String.format("%s%d", this.algorithm.toUpperCase(), this.keysize);
+            return SignatureAlgorithm.forName(name);
+        }
+    }
+    
+    @Data
+    public static final class ServiceProperties {
+
+        private String id;
+
+        private String type;
+
+        private String serviceEndpoint;
+
+        private String name;
     }
 }

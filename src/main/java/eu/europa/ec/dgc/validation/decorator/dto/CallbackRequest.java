@@ -18,42 +18,35 @@
  * ---license-end
  */
 
-package eu.europa.ec.dgc.validation.decorator.entity;
+package eu.europa.ec.dgc.validation.decorator.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 
 @Data
-public class ValidationServiceIdentityResponse {
+public class CallbackRequest {
+
+    private String issuer;
     
-    private String id;
+    private int iat;
     
-    private List<VerificationMethod> verificationMethod = new ArrayList<>();
+    private String sub;
+    
+    private String result;
+    
+    private String confirmation;
+    
+    private List<Result> results;
     
     @Data
-    public static final class VerificationMethod {
+    public static final class Result {
         
-        private String id;
+        private String identifier;
+        
+        private String result;
         
         private String type;
         
-        private String controller;
-        
-        @JsonProperty("publicKeyJWK")
-        private PublicKeyJwk publicKeyJwk;
-    }
-    
-    @Data
-    public static final class PublicKeyJwk {
-        
-        private String x5c;
-        
-        private String kid;
-        
-        private String alg;
-        
-        private String use;
+        private String details;
     }
 }

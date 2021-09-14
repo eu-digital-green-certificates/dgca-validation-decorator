@@ -20,40 +20,27 @@
 
 package eu.europa.ec.dgc.validation.decorator.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class ValidationServiceIdentityResponse {
-    
-    private String id;
-    
-    private List<VerificationMethod> verificationMethod = new ArrayList<>();
-    
-    @Data
-    public static final class VerificationMethod {
-        
-        private String id;
-        
-        private String type;
-        
-        private String controller;
-        
-        @JsonProperty("publicKeyJWK")
-        private PublicKeyJwk publicKeyJwk;
+@NoArgsConstructor
+public class ValidationServiceStatusResponse {
+
+    public Status status;
+
+    public int httpStatusCode;
+
+    public ValidationServiceStatusResponse(Status status, int httpStatusCode) {
+        this.status = status;
+        this.httpStatusCode = httpStatusCode;
     }
-    
-    @Data
-    public static final class PublicKeyJwk {
-        
-        private String x5c;
-        
-        private String kid;
-        
-        private String alg;
-        
-        private String use;
+
+    public static enum Status {
+        VALID,
+
+        WAITING,
+
+        ERROR;
     }
 }

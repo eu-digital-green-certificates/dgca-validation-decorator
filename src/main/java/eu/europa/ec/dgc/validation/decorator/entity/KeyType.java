@@ -21,8 +21,10 @@
 package eu.europa.ec.dgc.validation.decorator.entity;
 
 public enum KeyType {
+
+    ALL,
     
-    ValidationServiceEncKey, 
-    
-    ValidationServiceSignKey;
+    VALIDATION_DECORATOR_ENC_KEY,
+
+    VALIDATION_DECORATOR_SIGN_KEY;
 }

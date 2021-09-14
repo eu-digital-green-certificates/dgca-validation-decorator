@@ -2,25 +2,27 @@ identity:
   protocol: DCCVALIDATION
   protocolVersion: 1.0.0
   #### serviceIdentity
-  serviceIdentityUrl: https://serviceprovider/
+  serviceIdentityUrl: https://validation-decorator.example
   #### validationIdentity
-  validationIdentityUrl: https://validation.serviceprovider/
+  validationIdentityUrl: https://validation-decorator.example/identity
   consent: I want to check your DCC to confirm your booking! :)
   servicePovider: Service Provider.com
   restTemplate:
     connectionTimeout: 3000
     readTimeout: 3000
 
-token:
-  type: JWT
-  algorithm: ES
-  keysize: 256
-  issuer: Validation Decorator Dervice
-  validity: 3600 #### in seconds. Expiration is calculated
-  publicKey: MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEIPrtYsW9+Juwp/mt7h8FJ3LgFRIUl2Vlmcl1DUm5gNHl0LnHIL4Jff6mg6yVhehdQiMvkhUtTvmFIUWONSJEnw==
-  privateKey: MEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCBSuPIbykwH24sjQsTneeN6EyjiA1NK5W7uca+HxmGmWw==
-  keyAlgorithm: EC
+booking:
+  urls:
+    boardingPass: http://localhost:8082/boardingpass/{subject}
+    tokenContent: http://localhost:8082/tokencontent/{subject}
+    result: http://localhost:8082/result/{subject}
 
+validation:
+  urls:
+    identity: http://localhost:8081/identity
+    status: http://localhost:8081/status/{subject}
+
+#### Create Key: keytool -genkey -alias [ALIAS NAME] -keyalg EC -validity 3650 -keystore dev-decorator.jks -storetype JKS
 dgc:
   businessRulesDownload:
     timeInterval: 1800000
@@ -31,10 +33,52 @@ dgc:
   valueSetsDownload:
     timeInterval: 1800000
     lockLimit: 3600000
-  serviceUrl: https://validation-service.de
-  keyStoreFile: certs/dev-test.jks
-  keyStorePassword: dcc
-  privateKeyPassword: dcc
+  serviceUrl: http://localhost:8080
+  keyStoreFile: certs/dev-decorator.jks
+  keyStorePassword: changeMe
+  privateKeyPassword: changeMe  
+  activeSignKey: validationdecoratorsignkey
+  encAliases: 
+    - validationdecoratorenckey
+  signAliases: 
+    - validationdecoratorsignkey
+  token:
+    provider: config #### use "ks" (keyStore) or "config"
+    issuer: Validation Decorator Dervice
+    type: JWT
+    algorithm: ES
+    keysize: 256
+    validity: 3600 #### in seconds. Expiration is calculated
+    publicKey: MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEIPrtYsW9+Juwp/mt7h8FJ3LgFRIUl2Vlmcl1DUm5gNHl0LnHIL4Jff6mg6yVhehdQiMvkhUtTvmFIUWONSJEnw==
+    privateKey: MEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCBSuPIbykwH24sjQsTneeN6EyjiA1NK5W7uca+HxmGmWw==
+    keyAlgorithm: EC
+  services:
+    #### Validation Service
+    - id: http://localhost:8081/initialize
+      type: ValidationService
+      serviceEndpoint: http://localhost:8081/initialize
+      name: Validation Service Initialize
+    - id: http://localhost:8081/validate
+      type: DccValidatorService
+      serviceEndpoint: http://localhost:8081/validate
+      name: Validation Service Validate
+    #### Validation Decorator
+    - id: http://localhost:8080/token
+      type: AccessCredentialService
+      serviceEndpoint: http://localhost:8080/token
+      name: Validation Decorator Token
+    - id: http://localhost:8080/identity
+      type: ServiceProvider
+      serviceEndpoint: http://localhost:8080/identity
+      name: Validation Decorator Identity
+    - id: http://localhost:8080/reject
+      type: CancellationService
+      serviceEndpoint: http://localhost:8080/reject
+      name: Validation Decorator Reject
+    - id: http://localhost:8080/status
+      type: StatusService
+      serviceEndpoint: http://localhost:8080/status
+      name: Validation Decorator Status
 
 server:
   port: 8080

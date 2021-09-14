@@ -54,9 +54,8 @@ public class RejectController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     })
     @GetMapping(value = "/reject")
-    public ResponseEntity reject(@RequestHeader("Authorization") String token) {
+    public ResponseEntity reject(@RequestHeader("Authorization") final String token) {
         log.debug("Incoming GET request to '{}' with token '{}'", PATH, token);
-        log.info("This is a demo request that currently has no function.");
 
         if (accessTokenService.isValid(token)) {
             return ResponseEntity.ok().build();
