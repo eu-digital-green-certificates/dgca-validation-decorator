@@ -59,6 +59,13 @@ public class AccessTokenService {
     private final KeyProvider keyProvider;
 
     /**
+     * This token is generated an default access token without claims.
+     */
+    public String buildHeaderToken() {
+        return String.format("%s%s", TOKEN_PREFIX, buildAccessToken());
+    }
+
+    /**
      * This token is generated to access the Validation Decorator endpoints.
      * 
      * @param subject Subject
@@ -66,6 +73,14 @@ public class AccessTokenService {
      */
     public String buildHeaderToken(String subject) {
         return String.format("%s%s", TOKEN_PREFIX, buildAccessToken(subject));
+    }
+
+    /**
+     * This token is generated an default access token without claims.
+     */
+    public String buildAccessToken() {
+        return getAccessTokenBuilder()
+                .compact();
     }
 
     /**
@@ -77,21 +92,6 @@ public class AccessTokenService {
     public String buildAccessToken(final String subject) {
         return getAccessTokenBuilder()
                 .addClaims(Collections.singletonMap("sub", subject))
-                .compact();
-    }
-
-    /**
-     * This token is generated an default access token without claims.
-     */
-    public String buildHeaderToken() {
-        return String.format("%s%s", TOKEN_PREFIX, buildAccessToken());
-    }
-    
-    /**
-     * This token is generated an default access token without claims.
-     */
-    public String buildAccessToken() {
-        return getAccessTokenBuilder()
                 .compact();
     }
 
