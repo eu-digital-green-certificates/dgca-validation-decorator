@@ -80,14 +80,14 @@ public class DccTokenService {
         accessTokenConditions.setCod("DE"); // TODO Country of Departure
         accessTokenConditions.setRoa("AW"); // TODO Region of Arrival ISO 3166-2 without Country
         accessTokenConditions.setRod("BW"); // TODO Region of Departure ISO 3166-2 without Country
-        accessTokenConditions.setType(Arrays.asList("r", "v", "t")); // TODO 
-        accessTokenConditions.setCategory(Arrays.asList("Standard")); // TODO 
+        accessTokenConditions.setType(Arrays.asList("r", "v", "t")); // TODO dynamic
+        accessTokenConditions.setCategory(Arrays.asList("Standard")); // TODO dynamic 
         accessTokenConditions.setValidFrom(boardingPass.getFlightInfo()
                 .getTime().format(DateTimeFormatter.ISO_DATE_TIME));
         accessTokenConditions.setValidationClock(boardingPass.getFlightInfo()
-                .getTime().plusDays(1).format(DateTimeFormatter.ISO_DATE_TIME)); // TODO
+                .getTime().plusDays(1).format(DateTimeFormatter.ISO_DATE_TIME)); // TODO dynamic
         accessTokenConditions.setValidTo(boardingPass.getFlightInfo()
-                .getTime().plusDays(2).format(DateTimeFormatter.ISO_DATE_TIME)); // TODO
+                .getTime().plusDays(2).format(DateTimeFormatter.ISO_DATE_TIME)); // TODO dynamic
 
         AccessTokenPayload accessTokenPayload = new AccessTokenPayload();
         accessTokenPayload.setIss(dgcProperties.getToken().getIssuer());

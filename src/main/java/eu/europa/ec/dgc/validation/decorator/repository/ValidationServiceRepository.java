@@ -90,10 +90,8 @@ public class ValidationServiceRepository {
 
         final ValidationServiceInitializeRequest body = new ValidationServiceInitializeRequest();
         body.setPubKey(dccToken.getPubKey());
-        body.setKeyType("ES256"); // FIXME 
-        byte[] randomBytes = new byte[16];
-        new Random().nextBytes(randomBytes);
-        body.setNonce(Base64.getEncoder().encodeToString(randomBytes));
+        body.setKeyType("ES256"); // FIXME source?
+        body.setNonce(this.buildNonce());
         // TODO add callback
 
         final HttpHeaders headers = new HttpHeaders();
@@ -108,6 +106,8 @@ public class ValidationServiceRepository {
         log.debug("REST Call to '{}' done", url);
         return response.getBody();
     }
+    
+    
 
     /**
      * Validation service status endpoint.
@@ -154,5 +154,11 @@ public class ValidationServiceRepository {
 
         final ResponseEntity<String> response = restTpl.exchange(url, HttpMethod.POST, entity, String.class);
         return response.getBody();
+    }
+    
+    private String buildNonce() {
+        byte[] randomBytes = new byte[16];
+        new Random().nextBytes(randomBytes);
+        return Base64.getEncoder().encodeToString(randomBytes);
     }
 }

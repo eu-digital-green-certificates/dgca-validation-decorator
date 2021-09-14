@@ -57,14 +57,33 @@ dgc:
     privateKey: MEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCBSuPIbykwH24sjQsTneeN6EyjiA1NK5W7uca+HxmGmWw==
     keyAlgorithm: EC
   services:
-    - id: http://localhost:8080/token
-      type: AccessCredentialService
-      serviceEndpoint: http://localhost:8080/token
-      name: Validation Decorator Token
+    #### Validation Service
     - id: http://localhost:8081/initialize
       type: ValidationService
       serviceEndpoint: http://localhost:8081/initialize
       name: Validation Service Initialize
+    - id: http://localhost:8081/validate
+      type: DccValidatorService
+      serviceEndpoint: http://localhost:8081/validate
+      name: Validation Service Validate
+    #### Validation Decorator
+    - id: http://localhost:8080/token
+      type: AccessCredentialService
+      serviceEndpoint: http://localhost:8080/token
+      name: Validation Decorator Token
+    - id: http://localhost:8080/identity
+      type: ServiceProvider
+      serviceEndpoint: http://localhost:8080/identity
+      name: Validation Decorator Identity
+    - id: http://localhost:8080/reject
+      type: CancellationService
+      serviceEndpoint: http://localhost:8080/reject
+      name: Validation Decorator Reject
+    - id: http://localhost:8080/status
+      type: StatusService
+      serviceEndpoint: http://localhost:8080/status
+      name: Validation Decorator Status
+    
 
 server:
   port: 8080

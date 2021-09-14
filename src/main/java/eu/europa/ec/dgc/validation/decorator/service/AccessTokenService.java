@@ -59,14 +59,14 @@ public class AccessTokenService {
     private final KeyProvider keyProvider;
 
     /**
-     * This token is generated an default access token without claims.
+     * This token is generated an default header token without 'Bearer' prefix.
      */
     public String buildHeaderToken() {
         return String.format("%s%s", TOKEN_PREFIX, buildAccessToken());
     }
 
     /**
-     * This token is generated to access the Validation Decorator endpoints.
+     * This token is generated an default header token without 'Bearer' prefix.
      * 
      * @param subject Subject
      * @return {@link String} JWT token
