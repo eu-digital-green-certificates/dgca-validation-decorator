@@ -83,7 +83,6 @@ dgc:
       type: StatusService
       serviceEndpoint: http://localhost:8080/status
       name: Validation Decorator Status
-    
 
 server:
   port: 8080
