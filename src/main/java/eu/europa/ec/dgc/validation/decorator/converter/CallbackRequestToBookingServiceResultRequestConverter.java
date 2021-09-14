@@ -27,6 +27,7 @@ import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceResultRequest.
 import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceResultRequest.DccStatusResult;
 import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceResultRequest.DccStatusType;
 import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceResultRequest.ResultRequest;
+import eu.europa.ec.dgc.validation.decorator.exception.NotFoundException;
 import java.util.stream.Collectors;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
@@ -55,8 +56,20 @@ public class CallbackRequestToBookingServiceResultRequestConverter
         final ResultRequest resultRequest = new ResultRequest();
         resultRequest.setIdentifier(callbackResult.getIdentifier());
         resultRequest.setResult(DccStatusResult.valueOf(callbackResult.getResult()));
-        resultRequest.setType(DccStatusType.valueOf(callbackResult.getType()));
         resultRequest.setDetails(callbackResult.getDetails());
+
+        for (DccStatusType dccStatusType : DccStatusType.values()) {
+            if (dccStatusType.getName().equalsIgnoreCase(callbackResult.getType())
+                    || dccStatusType.name().equalsIgnoreCase(callbackResult.getType())) {
+                resultRequest.setType(dccStatusType);
+            }
+        }
+
+        if (callbackResult.getType() != null
+                && !callbackResult.getType().isBlank()
+                && resultRequest.getType() == null) {
+            throw new NotFoundException(String.format("Enum for type '%s' not found", callbackResult.getType()));
+        }
         return resultRequest;
     }
 }
