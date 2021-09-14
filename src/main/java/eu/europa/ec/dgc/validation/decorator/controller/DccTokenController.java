@@ -66,8 +66,7 @@ public class DccTokenController {
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     })
-    @PostMapping(value = PATH, 
-        consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = PATH, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<AccessTokenPayload> token(
             @RequestHeader("Authorization") final String token,
             @Valid @RequestBody final DccTokenRequest dccToken) {

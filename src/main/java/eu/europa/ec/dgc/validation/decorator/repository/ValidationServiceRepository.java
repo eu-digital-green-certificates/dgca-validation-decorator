@@ -22,6 +22,7 @@ package eu.europa.ec.dgc.validation.decorator.repository;
 
 import eu.europa.ec.dgc.validation.decorator.config.DgcProperties.ServiceProperties;
 import eu.europa.ec.dgc.validation.decorator.dto.DccTokenRequest;
+import eu.europa.ec.dgc.validation.decorator.entity.DccValidationRequest;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceIdentityResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceInitializeRequest;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceInitializeResponse;
@@ -50,14 +51,8 @@ public class ValidationServiceRepository {
     @Value("${validation.urls.identity}")
     private String identityUrl;
 
-    @Value("${validation.urls.initialize}")
-    private String initializeUrl;
-
     @Value("${validation.urls.status}")
     private String statusUrl;
-
-    @Value("${validation.urls.validate}")
-    private String validateUrl;
 
     private final RestTemplate restTpl;
 
@@ -106,8 +101,6 @@ public class ValidationServiceRepository {
         log.debug("REST Call to '{}' done", url);
         return response.getBody();
     }
-    
-    
 
     /**
      * Validation service status endpoint.
@@ -115,7 +108,7 @@ public class ValidationServiceRepository {
      * @param subject {@link String}
      * @return {@link ValidationServiceStatusResponse}
      */
-    public ValidationServiceStatusResponse status(String subject) {
+    public ValidationServiceStatusResponse status(final String subject) {
         final String url = this.statusUrl.replace(PLACEHOLDER_SUBJECT, subject);
 
         final HttpHeaders headers = new HttpHeaders();
@@ -138,24 +131,26 @@ public class ValidationServiceRepository {
     /**
      * Validation service validate endpoint.
      * 
+     * @param service {@link ServiceProperties}
      * @param subject {@link String}
      * @return {@link String}
      */
-    public String validate(final String subject) {
-        final String url = this.initializeUrl.replace(PLACEHOLDER_SUBJECT, subject);
+    public String validate(final ServiceProperties service, final String subject) {
+        final String url = String.format("%s/%s", service.getServiceEndpoint(), subject);
 
         final HttpHeaders headers = new HttpHeaders();
         headers.add("X-Version", "1.0");
         headers.add("Authorization", accessTokenService.buildHeaderToken(subject));
 
-        // TODO add body DccValidationRequest
+        final DccValidationRequest body = new DccValidationRequest();
+        // TODO content source?
 
-        final HttpEntity<String> entity = new HttpEntity<>(headers);
+        final HttpEntity<DccValidationRequest> entity = new HttpEntity<>(body, headers);
 
         final ResponseEntity<String> response = restTpl.exchange(url, HttpMethod.POST, entity, String.class);
         return response.getBody();
     }
-    
+
     private String buildNonce() {
         byte[] randomBytes = new byte[16];
         new Random().nextBytes(randomBytes);

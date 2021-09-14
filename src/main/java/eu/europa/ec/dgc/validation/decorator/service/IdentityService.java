@@ -21,12 +21,14 @@
 package eu.europa.ec.dgc.validation.decorator.service;
 
 import eu.europa.ec.dgc.validation.decorator.config.DgcProperties;
+import eu.europa.ec.dgc.validation.decorator.config.DgcProperties.ServiceProperties;
 import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse;
 import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse.PublicKeyJwkIdentityResponse;
 import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse.ServiceIdentityResponse;
 import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse.VerificationIdentityResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.KeyType;
 import eu.europa.ec.dgc.validation.decorator.exception.DccException;
+import eu.europa.ec.dgc.validation.decorator.exception.NotFoundException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
@@ -58,7 +60,7 @@ public class IdentityService {
      * @return {@link IdentityResponse}
      */
     public IdentityResponse getIdentity(final String element, final String id) {
-        // TODO impl elementId and elementName
+        // TODO impl filter for id
 
         final String identityId = String.format("%s%s", dgcProperties.getServiceUrl(), IDENTITY_PATH);
 
@@ -78,6 +80,22 @@ public class IdentityService {
         identityResponse.setVerificationMethod(verificationMethods);
         identityResponse.setService(getServices());
         return identityResponse;
+    }
+
+    /**
+     * Delivers the service based on the id.
+     * 
+     * @param serviceId Service ID
+     * @return {@link ServiceProperties}
+     */
+    public ServiceProperties getServicePropertiesById(final String serviceId) {
+        if (serviceId != null && dgcProperties.getServices() != null) {
+            return dgcProperties.getServices().stream()
+                    .filter(service -> serviceId.equals(service.getId()))
+                    .findFirst()
+                    .orElseThrow(() -> new NotFoundException(String.format("Service not found by ID '%s'", serviceId)));
+        }
+        throw new NotFoundException("Verification method not found. No ID available.");
     }
 
     private List<ServiceIdentityResponse> getServices() {

@@ -20,11 +20,7 @@ booking:
 validation:
   urls:
     identity: http://localhost:8081/identity
-    initialize: http://localhost:8081/initialize/{subject}
     status: http://localhost:8081/status/{subject}
-    validate: http://localhost:8081/validate/{subject}
-
-
 
 #### Create Key: keytool -genkey -alias [ALIAS NAME] -keyalg EC -validity 3650 -keystore dev-decorator.jks -storetype JKS
 dgc:

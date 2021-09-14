@@ -30,6 +30,7 @@ import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceTokenContentRe
 import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceTokenContentResponse.PassengerResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceInitializeResponse;
 import eu.europa.ec.dgc.validation.decorator.exception.NotFoundException;
+import eu.europa.ec.dgc.validation.decorator.exception.NotImplementedException;
 import eu.europa.ec.dgc.validation.decorator.repository.BookingServiceRepository;
 import eu.europa.ec.dgc.validation.decorator.repository.ValidationServiceRepository;
 import java.time.Instant;
@@ -42,11 +43,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class DccTokenService {
 
+    private static final String TYPE_VALIDATION_SERVICE = "ValidationService";
+
     private final DgcProperties dgcProperties;
 
     private final ValidationServiceRepository validationServiceRepository;
 
     private final BookingServiceRepository bookingServiceRepository;
+
+    private final IdentityService identityService;
 
     /**
      * Request validation- and booking service to create token.
@@ -56,7 +61,10 @@ public class DccTokenService {
      */
     public AccessTokenPayload getAccessTockenForValidationService(
             final DccTokenRequest dccToken, final String subject) {
-        final ServiceProperties service = getServicePropertiesById(dccToken.getService());
+        final ServiceProperties service = identityService.getServicePropertiesById(dccToken.getService());
+        if (!TYPE_VALIDATION_SERVICE.equalsIgnoreCase(service.getType())) {
+            throw new NotImplementedException(String.format("Service type '%s' not implemented", service.getType()));
+        }
 
         final ValidationServiceInitializeResponse initialize = validationServiceRepository
                 .initialize(service, dccToken, subject);
@@ -69,6 +77,14 @@ public class DccTokenService {
 
         final BookingServiceBoardingPassResponse boardingPass = bookingServiceRepository.boardingPass(subject);
 
+        return buildAccessToken(subject, initialize, passenger, boardingPass);
+    }
+
+    private AccessTokenPayload buildAccessToken(
+            final String subject,
+            final ValidationServiceInitializeResponse initialize,
+            final PassengerResponse passenger,
+            final BookingServiceBoardingPassResponse boardingPass) {
         AccessTokenConditions accessTokenConditions = new AccessTokenConditions();
         accessTokenConditions.setLang("en-en"); // TODO Selected language
         accessTokenConditions.setFnt(passenger.getForename());
@@ -96,17 +112,6 @@ public class DccTokenService {
         accessTokenPayload.setType(2);
         accessTokenPayload.setConditions(accessTokenConditions);
         accessTokenPayload.setVersion("1.0");
-
         return accessTokenPayload;
-    }
-
-    private ServiceProperties getServicePropertiesById(final String serviceId) {
-        if (serviceId != null && dgcProperties.getServices() != null) {
-            return dgcProperties.getServices().stream()
-                    .filter(service -> serviceId.equals(service.getId()))
-                    .findFirst()
-                    .orElseThrow(() -> new NotFoundException(String.format("Service not found by ID '%s'", serviceId)));
-        }
-        throw new NotFoundException("Verification method not found. No ID available.");
     }
 }
