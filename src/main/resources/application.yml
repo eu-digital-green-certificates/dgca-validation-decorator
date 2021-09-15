@@ -13,7 +13,6 @@ identity:
 
 booking:
   urls:
-    boardingPass: http://localhost:8082/boardingpass/{subject}
     tokenContent: http://localhost:8082/tokencontent/{subject}
     result: http://localhost:8082/result/{subject}
 
