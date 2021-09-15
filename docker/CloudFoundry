@@ -9,5 +9,5 @@ COPY ./entrypoint/entrypoint.sh /entrypoint.sh
 COPY ./certs/dev-test.jks /certs/dev-test.jks
 COPY ./certs/dev-decorator.jks /certs/dev-decorator.jks
 RUN apk --no-cache add openjdk11-jre
-EXPOSE 8080
+EXPOSE 80
 CMD sh ./entrypoint.sh
