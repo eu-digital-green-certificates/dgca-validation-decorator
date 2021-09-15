@@ -28,4 +28,8 @@
     <!--  Vulnerability impacts WebFlux apps only and can be ignored here.  -->
     <cve>CVE-2021-22118</cve>
   </suppress>
+  <suppress>
+    <!-- tomcat-embed-core-9.0.52.jar : CVE-2020-0822-->
+	<cve>CVE-2020-0822</cve>
+  </suppress>
 </suppressions>
