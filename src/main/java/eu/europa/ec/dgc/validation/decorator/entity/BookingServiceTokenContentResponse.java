@@ -20,6 +20,7 @@
 
 package eu.europa.ec.dgc.validation.decorator.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -86,5 +87,23 @@ public class BookingServiceTokenContentResponse {
         private String to;
 
         private OffsetDateTime time;
+        
+        @JsonProperty("coa")
+        private String countryOfArrival;
+
+        @JsonProperty("cod")
+        private String countryOfDeparture;
+
+        @JsonProperty("roa")
+        private String regionOfArrival;
+
+        @JsonProperty("rod")
+        private String regionOfDeparture;
+
+        @JsonProperty("departureTime")
+        private OffsetDateTime departureTime;
+
+        @JsonProperty("arrivalTime")
+        private OffsetDateTime arrivalTime;
     }
 }

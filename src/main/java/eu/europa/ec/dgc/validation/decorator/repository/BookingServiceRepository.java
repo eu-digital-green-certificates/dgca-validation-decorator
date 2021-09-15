@@ -20,7 +20,6 @@
 
 package eu.europa.ec.dgc.validation.decorator.repository;
 
-import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceBoardingPassResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceResultRequest;
 import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceTokenContentResponse;
 import eu.europa.ec.dgc.validation.decorator.service.AccessTokenService;
@@ -39,9 +38,6 @@ public class BookingServiceRepository {
 
     private static final String PLACEHOLDER_SUBJECT = "{subject}";
 
-    @Value("${booking.urls.boardingPass}")
-    private String boardingPassUrl;
-
     @Value("${booking.urls.tokenContent}")
     private String tokenContentUrl;
 
@@ -51,25 +47,6 @@ public class BookingServiceRepository {
     private final RestTemplate restTpl;
 
     private final AccessTokenService accessTokenService;
-
-    /**
-     * Booking service boarding pass endpoint.
-     * 
-     * @param subject {@link String}
-     * @return {@link BookingServiceBoardingPassResponse}
-     */
-    public BookingServiceBoardingPassResponse boardingPass(final String subject) {
-        final String url = this.boardingPassUrl.replace(PLACEHOLDER_SUBJECT, subject);
-
-        final HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", accessTokenService.buildHeaderToken(subject));
-
-        final HttpEntity<String> entity = new HttpEntity<>(headers);
-
-        final ResponseEntity<BookingServiceBoardingPassResponse> response = this.restTpl.exchange(url, HttpMethod.GET,
-                entity, BookingServiceBoardingPassResponse.class);
-        return response.getBody();
-    }
 
     /**
      * Booking service token content endpoint.
@@ -94,15 +71,15 @@ public class BookingServiceRepository {
      * Booking service result endpoint.
      * 
      * @param subject {@link String}
-     * @param request {@link BookingServiceResultRequest}
+     * @param body {@link BookingServiceResultRequest}
      */
-    public void result(final String subject, final BookingServiceResultRequest request) {
+    public void result(final String subject, final BookingServiceResultRequest body) {
         final String url = this.resultUrl.replace(PLACEHOLDER_SUBJECT, subject);
 
         final HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", accessTokenService.buildHeaderToken(subject));
 
-        final HttpEntity<BookingServiceResultRequest> entity = new HttpEntity<>(request, headers);
+        final HttpEntity<BookingServiceResultRequest> entity = new HttpEntity<>(body, headers);
 
         this.restTpl.exchange(url, HttpMethod.PUT, entity, String.class);
     }

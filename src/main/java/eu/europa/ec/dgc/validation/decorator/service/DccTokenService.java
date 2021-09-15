@@ -25,8 +25,8 @@ import eu.europa.ec.dgc.validation.decorator.config.DgcProperties.ServicePropert
 import eu.europa.ec.dgc.validation.decorator.dto.AccessTokenPayload;
 import eu.europa.ec.dgc.validation.decorator.dto.AccessTokenPayload.AccessTokenConditions;
 import eu.europa.ec.dgc.validation.decorator.dto.DccTokenRequest;
-import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceBoardingPassResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceTokenContentResponse;
+import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceTokenContentResponse.FlightInfoResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceTokenContentResponse.PassengerResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceInitializeResponse;
 import eu.europa.ec.dgc.validation.decorator.exception.NotFoundException;
@@ -34,6 +34,7 @@ import eu.europa.ec.dgc.validation.decorator.exception.NotImplementedException;
 import eu.europa.ec.dgc.validation.decorator.repository.BookingServiceRepository;
 import eu.europa.ec.dgc.validation.decorator.repository.ValidationServiceRepository;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,10 @@ import org.springframework.stereotype.Service;
 public class DccTokenService {
 
     private static final String TYPE_VALIDATION_SERVICE = "ValidationService";
+
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
+
+    private static final DateTimeFormatter BIRTH_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     private final DgcProperties dgcProperties;
 
@@ -74,34 +79,32 @@ public class DccTokenService {
             throw new NotFoundException("Passenger not found by subject");
         }
         final PassengerResponse passenger = tokenContent.getPassengers().get(0);
+        final FlightInfoResponse flightInfo = tokenContent.getFlightInfo();
 
-        final BookingServiceBoardingPassResponse boardingPass = bookingServiceRepository.boardingPass(subject);
-
-        return buildAccessToken(subject, initialize, passenger, boardingPass);
+        return buildAccessToken(subject, initialize, passenger, flightInfo);
     }
 
     private AccessTokenPayload buildAccessToken(
             final String subject,
             final ValidationServiceInitializeResponse initialize,
             final PassengerResponse passenger,
-            final BookingServiceBoardingPassResponse boardingPass) {
+            final FlightInfoResponse flightInfo) {
         AccessTokenConditions accessTokenConditions = new AccessTokenConditions();
         accessTokenConditions.setLang("en-en"); // TODO Selected language
         accessTokenConditions.setFnt(passenger.getForename());
         accessTokenConditions.setGnt(passenger.getLastname());
-        accessTokenConditions.setDob(passenger.getBirthDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
-        accessTokenConditions.setCoa("NL"); // TODO Country of Arrival
-        accessTokenConditions.setCod("DE"); // TODO Country of Departure
-        accessTokenConditions.setRoa("AW"); // TODO Region of Arrival ISO 3166-2 without Country
-        accessTokenConditions.setRod("BW"); // TODO Region of Departure ISO 3166-2 without Country
+        accessTokenConditions.setDob(passenger.getBirthDate().format(BIRTH_DATE_FORMATTER));
+        accessTokenConditions.setCoa(flightInfo.getCountryOfArrival());
+        accessTokenConditions.setCod(flightInfo.getCountryOfDeparture());
+        accessTokenConditions.setRoa(flightInfo.getRegionOfArrival());
+        accessTokenConditions.setRod(flightInfo.getRegionOfDeparture());
         accessTokenConditions.setType(Arrays.asList("r", "v", "t")); // TODO dynamic
         accessTokenConditions.setCategory(Arrays.asList("Standard")); // TODO dynamic 
-        accessTokenConditions.setValidFrom(boardingPass.getFlightInfo()
-                .getTime().format(DateTimeFormatter.ISO_DATE_TIME));
-        accessTokenConditions.setValidationClock(boardingPass.getFlightInfo()
-                .getTime().plusDays(1).format(DateTimeFormatter.ISO_DATE_TIME)); // TODO dynamic
-        accessTokenConditions.setValidTo(boardingPass.getFlightInfo()
-                .getTime().plusDays(2).format(DateTimeFormatter.ISO_DATE_TIME)); // TODO dynamic
+
+        final OffsetDateTime departureTime = flightInfo.getDepartureTime();
+        accessTokenConditions.setValidFrom(departureTime.format(FORMATTER));
+        accessTokenConditions.setValidationClock(flightInfo.getArrivalTime().format(FORMATTER));
+        accessTokenConditions.setValidTo(departureTime.plusDays(2).format(FORMATTER));
 
         AccessTokenPayload accessTokenPayload = new AccessTokenPayload();
         accessTokenPayload.setIss(dgcProperties.getToken().getIssuer());
