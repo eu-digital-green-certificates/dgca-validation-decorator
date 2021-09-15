@@ -10,4 +10,5 @@ COPY ./certs/dev-test.jks /certs/dev-test.jks
 COPY ./certs/dev-decorator.jks /certs/dev-decorator.jks
 RUN apk --no-cache add openjdk11-jre
 EXPOSE 80
+EXPOSE 8080
 CMD sh ./entrypoint.sh
