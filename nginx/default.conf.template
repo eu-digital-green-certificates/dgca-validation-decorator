@@ -2,24 +2,24 @@ server {
     listen       8080;
     server_name  localhost;
     location / {
-      proxy_pass http://localhost:8080/identity;
+      proxy_pass http://localhost:8081/identity;
     }
     location /identity {
-       proxy_pass http://localhost:8080/identity;
+       proxy_pass http://localhost:8081/identity;
     }
     location /token {
-      proxy_pass http://localhost:8080/token;
+      proxy_pass http://localhost:8081/token;
     }
     location /initialize {
-      proxy_pass http://localhost:8080/initialize;
+      proxy_pass http://localhost:8081/initialize;
     }
     location /reject {
-      proxy_pass http://localhost:8080/reject;
+      proxy_pass http://localhost:8081/reject;
     }
     location /status {
-      proxy_pass http://localhost:8080/status;
+      proxy_pass http://localhost:8081/status;
     }
     location /callback {
-      proxy_pass http://localhost:8080/callback;
+      proxy_pass http://localhost:8081/callback;
     }
 }
