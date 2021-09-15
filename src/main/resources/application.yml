@@ -42,8 +42,8 @@ dgc:
       serviceEndpoint: http://localhost:8081
       name: Validation Service
     #### Validation Decorator
-    - id: http://localhost:8080/identity/AccessCredentialService
-      type: AccessCredentialService
+    - id: http://localhost:8080/identity/AccessTokenService
+      type: AccessTokenService
       serviceEndpoint: http://localhost:8080/token
       name: Validation Decorator Token
     - id: http://localhost:8080/identity/ServiceProvider
