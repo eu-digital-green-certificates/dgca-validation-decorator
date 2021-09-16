@@ -22,6 +22,7 @@ package eu.europa.ec.dgc.validation.decorator.service;
 
 import eu.europa.ec.dgc.validation.decorator.config.DgcProperties;
 import eu.europa.ec.dgc.validation.decorator.config.DgcProperties.ServiceProperties;
+import eu.europa.ec.dgc.validation.decorator.controller.IdentityController;
 import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse;
 import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse.PublicKeyJwkIdentityResponse;
 import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse.ServiceIdentityResponse;
@@ -29,9 +30,9 @@ import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse.VerificationId
 import eu.europa.ec.dgc.validation.decorator.entity.KeyType;
 import eu.europa.ec.dgc.validation.decorator.exception.DccException;
 import eu.europa.ec.dgc.validation.decorator.exception.NotFoundException;
+import io.vavr.collection.Stream;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,11 +43,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class IdentityService {
 
-    private static final String IDENTITY_PATH = "/identity";
+    private static final String IDENTITY_PATH = IdentityController.PATH_ALL;
 
     private static final String VERIFICATION_TYPE = "JsonWebKey2020";
 
-    private static final String PUBLIC_KEY_ALGORITM = "ES256";
+    
 
     private final DgcProperties dgcProperties;
 
@@ -78,7 +79,7 @@ public class IdentityService {
         final IdentityResponse identityResponse = new IdentityResponse();
         identityResponse.setId(identityId);
         identityResponse.setVerificationMethod(verificationMethods);
-        identityResponse.setService(getServices());
+        identityResponse.setService(getServices(element, id));
         return identityResponse;
     }
 
@@ -98,31 +99,31 @@ public class IdentityService {
         throw new NotFoundException("Verification method not found. No ID available.");
     }
 
-    private List<ServiceIdentityResponse> getServices() {
-        List<ServiceIdentityResponse> services = new ArrayList<>();
-        if (dgcProperties.getServices() != null) {
-            dgcProperties.getServices().stream().map(service -> {
-                ServiceIdentityResponse response = new ServiceIdentityResponse();
-                response.setId(service.getId());
-                response.setType(service.getType());
-                response.setServiceEndpoint(service.getServiceEndpoint());
-                response.setName(service.getName());
-                return response;
-            }).forEach(services::add);
-        }
-        return services;
+    private List<ServiceIdentityResponse> getServices(final String element, final String id) {
+        // TODO impl filter for id
+        return Stream.concat(dgcProperties.getServices(), dgcProperties.getEndpoints())
+                .filter(service -> element == null || element.equalsIgnoreCase(service.getType()))
+                .map(service -> {
+                    final ServiceIdentityResponse response = new ServiceIdentityResponse();
+                    response.setId(service.getId());
+                    response.setType(service.getType());
+                    response.setServiceEndpoint(service.getServiceEndpoint());
+                    response.setName(service.getName());
+                    return response;
+                }).collect(Collectors.toList());
     }
 
     private PublicKeyJwkIdentityResponse buildPublicKey(String keyName) {
-        final Certificate certificate = keyProvider.receiveCertificate(keyName);
-        final PublicKeyJwkIdentityResponse publicKeyJwk = new PublicKeyJwkIdentityResponse();
+        final Certificate certificate = keyProvider.receiveCertificate(keyName);        
         try {
+            final PublicKeyJwkIdentityResponse publicKeyJwk = new PublicKeyJwkIdentityResponse();
             publicKeyJwk.setX5c(Base64.getEncoder().encodeToString(certificate.getEncoded()));
             publicKeyJwk.setKid(keyProvider.getKid(keyName));
-            publicKeyJwk.setAlg(PUBLIC_KEY_ALGORITM);
+            publicKeyJwk.setAlg(keyProvider.getAlg(keyName));
+            publicKeyJwk.setUse(keyProvider.getKeyUse(keyName).name().toLowerCase());
+            return publicKeyJwk;
         } catch (CertificateEncodingException e) {
             throw new DccException("Can not encode certificate", e);
         }
-        return publicKeyJwk;
     }
 }

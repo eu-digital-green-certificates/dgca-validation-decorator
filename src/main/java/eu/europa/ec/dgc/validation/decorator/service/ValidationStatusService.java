@@ -20,7 +20,12 @@
 
 package eu.europa.ec.dgc.validation.decorator.service;
 
+import eu.europa.ec.dgc.validation.decorator.config.DgcProperties.ServiceProperties;
+import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceTokenContentResponse;
+import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceTokenContentResponse.PassengerResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceStatusResponse;
+import eu.europa.ec.dgc.validation.decorator.exception.NotFoundException;
+import eu.europa.ec.dgc.validation.decorator.repository.BookingServiceRepository;
 import eu.europa.ec.dgc.validation.decorator.repository.ValidationServiceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,10 +33,32 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class ValidationStatusService {
-    
+
+    private final BookingServiceRepository bookingServiceRepository;
+
+    private final IdentityService identityService;
+
     private final ValidationServiceRepository validationServiceRepository;
-    
-    public ValidationServiceStatusResponse determineStatus(String subject) {
-        return validationServiceRepository.status(subject);
+
+    /**
+     * Determines the status of the validation service.
+     * 
+     * @param subject Subject ID
+     * @return {@link ValidationServiceStatusResponse}
+     */
+    public ValidationServiceStatusResponse determineStatus(final String subject) {
+        final BookingServiceTokenContentResponse tokenContent = bookingServiceRepository.tokenContent(subject);
+        if (tokenContent.getPassengers() == null || tokenContent.getPassengers().isEmpty()) {
+            throw new NotFoundException("Passenger not found by subject");
+        }
+
+        final PassengerResponse passenger = tokenContent.getPassengers().get(0);
+        final String serviceId = passenger.getServiceIdUsed();
+        if (serviceId == null || serviceId.isBlank()) {
+            throw new NotFoundException("Passenger without service ID");
+        }
+
+        final ServiceProperties service = identityService.getServicePropertiesById(serviceId);
+        return validationServiceRepository.status(service, subject);
     }
 }

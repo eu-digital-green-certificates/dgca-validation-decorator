@@ -20,7 +20,6 @@
 
 package eu.europa.ec.dgc.validation.decorator.config;
 
-import io.jsonwebtoken.SignatureAlgorithm;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -35,12 +34,6 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("dgc")
 public class DgcProperties {
 
-    private final GatewayDownload businessRulesDownload = new GatewayDownload();
-
-    private final GatewayDownload valueSetsDownload = new GatewayDownload();
-
-    private final GatewayDownload countryListDownload = new GatewayDownload();
-
     @DurationUnit(ChronoUnit.SECONDS)
     private Duration validationExpire = Duration.ofMinutes(60);
 
@@ -54,13 +47,17 @@ public class DgcProperties {
 
     private String activeSignKey;
 
-    private List<String> encAliases;
+    private List<String> encAliases = new ArrayList<>();
 
-    private List<String> signAliases;
+    private List<String> signAliases = new ArrayList<>();
+
+    private List<String> keyAliases = new ArrayList<>();
 
     private TokenProperties token;
-    
+
     private List<ServiceProperties> services = new ArrayList<>();
+
+    private List<ServiceProperties> endpoints = new ArrayList<>();
 
     @Data
     public static final class GatewayDownload {
@@ -73,33 +70,19 @@ public class DgcProperties {
     @Data
     public static final class TokenProperties {
 
-        public static final String ALGORITHM_ELLIPTIC_CURVE = "ES";
-
-        // use "ks" (keyStore) or "config" 
-        private String provider;
-        
         private String issuer;
 
         private String type;
 
-        private String algorithm;
+        private TokenInitializeProperties initialize;
+    }
 
-        private int keysize;
+    @Data
+    public static final class TokenInitializeProperties {
 
         private int validity;
-        
-        private String publicKey;
-        
-        private String privateKey;
-        
-        private String keyAlgorithm;
-
-        public SignatureAlgorithm getSignatureAlgorithm() {
-            final String name = String.format("%s%d", this.algorithm.toUpperCase(), this.keysize);
-            return SignatureAlgorithm.forName(name);
-        }
     }
-    
+
     @Data
     public static final class ServiceProperties {
 

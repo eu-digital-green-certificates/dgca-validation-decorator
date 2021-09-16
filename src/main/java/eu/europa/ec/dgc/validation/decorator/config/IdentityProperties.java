@@ -34,9 +34,7 @@ public class IdentityProperties {
     private String protocolVersion;
     
     private String serviceIdentityUrl;
-    
-    private String validationIdentityUrl;
-    
+        
     private String consent;
     
     private String servicePovider;

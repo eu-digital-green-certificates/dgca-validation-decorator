@@ -22,7 +22,6 @@ package eu.europa.ec.dgc.validation.decorator.repository;
 
 import eu.europa.ec.dgc.validation.decorator.config.DgcProperties.ServiceProperties;
 import eu.europa.ec.dgc.validation.decorator.dto.DccTokenRequest;
-import eu.europa.ec.dgc.validation.decorator.entity.DccValidationRequest;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceIdentityResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceInitializeRequest;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceInitializeResponse;
@@ -33,26 +32,18 @@ import java.util.Base64;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ValidationServiceRepository {
-
-    private static final String PLACEHOLDER_SUBJECT = "{subject}";
-
-    @Value("${validation.urls.identity}")
-    private String identityUrl;
-
-    @Value("${validation.urls.status}")
-    private String statusUrl;
 
     private final RestTemplate restTpl;
 
@@ -64,8 +55,12 @@ public class ValidationServiceRepository {
      * 
      * @return {@link ValidationServiceIdentityResponse}
      */
-    public ValidationServiceIdentityResponse identity() {
-        final String url = this.identityUrl;
+    public ValidationServiceIdentityResponse identity(final ServiceProperties service) {
+        final String url = UriComponentsBuilder.fromUriString(service.getServiceEndpoint())
+                .path("identity")
+                .toUriString();
+
+        log.debug("REST Call to '{}' starting", url);
         final ResponseEntity<ValidationServiceIdentityResponse> response = restTpl
                 .getForEntity(url, ValidationServiceIdentityResponse.class);
         return response.getBody();
@@ -81,7 +76,9 @@ public class ValidationServiceRepository {
      */
     public ValidationServiceInitializeResponse initialize(
             final ServiceProperties service, DccTokenRequest dccToken, String subject) {
-        final String url = String.format("%s/%s", service.getServiceEndpoint(), subject);
+        final String url = UriComponentsBuilder.fromUriString(service.getServiceEndpoint())
+                .pathSegment("initialize", subject)
+                .toUriString();
 
         final ValidationServiceInitializeRequest body = new ValidationServiceInitializeRequest();
         body.setPubKey(dccToken.getPubKey());
@@ -98,7 +95,6 @@ public class ValidationServiceRepository {
         log.debug("REST Call to '{}' starting", url);
         final ResponseEntity<ValidationServiceInitializeResponse> response = restTpl
                 .exchange(url, HttpMethod.PUT, entity, ValidationServiceInitializeResponse.class);
-        log.debug("REST Call to '{}' done", url);
         return response.getBody();
     }
 
@@ -108,8 +104,10 @@ public class ValidationServiceRepository {
      * @param subject {@link String}
      * @return {@link ValidationServiceStatusResponse}
      */
-    public ValidationServiceStatusResponse status(final String subject) {
-        final String url = this.statusUrl.replace(PLACEHOLDER_SUBJECT, subject);
+    public ValidationServiceStatusResponse status(final ServiceProperties service, final String subject) {
+        final String url = UriComponentsBuilder.fromUriString(service.getServiceEndpoint())
+                .pathSegment("status", subject)
+                .toUriString();
 
         final HttpHeaders headers = new HttpHeaders();
         headers.add("X-Version", "1.0");
@@ -117,6 +115,7 @@ public class ValidationServiceRepository {
 
         final HttpEntity<String> entity = new HttpEntity<>(headers);
 
+        log.debug("REST Call to '{}' starting", url);
         final ResponseEntity<String> response = restTpl.exchange(url, HttpMethod.GET, entity, String.class);
         switch (response.getStatusCode()) {
             case OK:
@@ -126,29 +125,6 @@ public class ValidationServiceRepository {
             default:
                 return new ValidationServiceStatusResponse(Status.ERROR, response.getStatusCodeValue());
         }
-    }
-
-    /**
-     * Validation service validate endpoint.
-     * 
-     * @param service {@link ServiceProperties}
-     * @param subject {@link String}
-     * @return {@link String}
-     */
-    public String validate(final ServiceProperties service, final String subject) {
-        final String url = String.format("%s/%s", service.getServiceEndpoint(), subject);
-
-        final HttpHeaders headers = new HttpHeaders();
-        headers.add("X-Version", "1.0");
-        headers.add("Authorization", accessTokenService.buildHeaderToken(subject));
-
-        final DccValidationRequest body = new DccValidationRequest();
-        // TODO content source?
-
-        final HttpEntity<DccValidationRequest> entity = new HttpEntity<>(body, headers);
-
-        final ResponseEntity<String> response = restTpl.exchange(url, HttpMethod.POST, entity, String.class);
-        return response.getBody();
     }
 
     private String buildNonce() {

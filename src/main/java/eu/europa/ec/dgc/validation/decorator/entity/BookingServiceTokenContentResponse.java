@@ -51,6 +51,8 @@ public class BookingServiceTokenContentResponse {
         private LocalDate birthDate;
 
         private DccStatusResponse dccStatus;
+        
+        private String serviceIdUsed;
     }
 
     @Data

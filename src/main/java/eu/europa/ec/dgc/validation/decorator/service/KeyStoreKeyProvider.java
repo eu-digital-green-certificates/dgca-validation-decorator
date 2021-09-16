@@ -85,44 +85,49 @@ public class KeyStoreKeyProvider implements KeyProvider {
 
         final Path filePath = Path.of(dgcConfigProperties.getKeyStoreFile());
         if (!Files.exists(filePath)) {
-            log.error("keyfile not found on: {} please adapt the configuration property: issuance.keyStoreFile",
+            final String msg = String.format(
+                    "keyfile not found on '%s' please adapt the configuration property: issuance.keyStoreFile",
                     filePath);
-            throw new DccException("keyfile not found on: " + filePath
-                    + " please adapt the configuration property: issuance.keyStoreFile");
+            log.error(msg);
+            throw new DccException(msg);
         }
 
-        final CertificateUtils certificateUtils = new CertificateUtils();
         final KeyStore keyStore = KeyStore.getInstance("JKS");
         final char[] keyStorePassword = dgcConfigProperties.getKeyStorePassword().toCharArray();
         try (InputStream is = new FileInputStream(dgcConfigProperties.getKeyStoreFile())) {
             final char[] privateKeyPassword = dgcConfigProperties.getPrivateKeyPassword().toCharArray();
             keyStore.load(is, privateKeyPassword);
-            KeyStore.PasswordProtection keyPassword = new KeyStore.PasswordProtection(keyStorePassword);
+            final KeyStore.PasswordProtection keyPassword = new KeyStore.PasswordProtection(keyStorePassword);
 
-            for (String alias : this.getKeyNames(KeyType.ALL)) {
-                final PrivateKeyEntry privateKeyEntry = (PrivateKeyEntry) keyStore.getEntry(alias, keyPassword);
-
-                if (privateKeyEntry != null) {
-                    final X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
-                    PrivateKey privateKey = privateKeyEntry.getPrivateKey();
-                    certificates.put(alias, cert);
-                    privateKeys.put(alias, privateKey);
-
-                    final String kid = certificateUtils.getCertKid((X509Certificate) cert);
-                    kids.put(alias, kid);
-                    kidToName.put(kid, alias);
-
-                    if (cert.getSigAlgOID().contains("1.2.840.113549.1.1.1")) {
-                        algs.put(alias, "RS256");
-                    } else if (cert.getSigAlgOID().contains("1.2.840.113549.1.1.10")) {
-                        algs.put(alias, "PS256");
-                    } else if (cert.getSigAlgOID().contains("1.2.840.10045.4.3.2")) {
-                        algs.put(alias, "ES256");
-                    } else {
-                        throw new NotImplementedException(String.format("SigAlg OID '{}'", cert.getSigAlgOID()));
+            for (final String alias : this.getKeyNames(KeyType.ALL)) {
+                if (keyStore.isKeyEntry(alias)) {
+                    final PrivateKeyEntry privateKeyEntry = (PrivateKeyEntry) keyStore.getEntry(alias, keyPassword);
+                    if (privateKeyEntry != null) {
+                        final PrivateKey privateKey = privateKeyEntry.getPrivateKey();
+                        privateKeys.put(alias, privateKey);
                     }
-                }
+                } 
+                final X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
+                this.handleCertificate(alias, cert);
             }
+        }
+    }
+
+    private void handleCertificate(final String alias, final X509Certificate cert) {
+        this.certificates.put(alias, cert);
+
+        final String kid = new CertificateUtils().getCertKid((X509Certificate) cert);
+        this.kids.put(alias, kid);
+        this.kidToName.put(kid, alias);
+
+        if (cert.getSigAlgOID().contains("1.2.840.113549.1.1.1")) {
+            this.algs.put(alias, "RS256");
+        } else if (cert.getSigAlgOID().contains("1.2.840.113549.1.1.10")) {
+            this.algs.put(alias, "PS256");
+        } else if (cert.getSigAlgOID().contains("1.2.840.10045.4.3.2")) {
+            this.algs.put(alias, "ES256");
+        } else {
+            throw new NotImplementedException(String.format("SigAlg OID '{}'", cert.getSigAlgOID()));
         }
     }
 
@@ -146,9 +151,13 @@ public class KeyStoreKeyProvider implements KeyProvider {
             case VALIDATION_DECORATOR_SIGN_KEY:
                 keyNames.addAll(dgcConfigProperties.getSignAliases());
                 break;
+            case VALIDATION_DECORATOR_KEY:
+                keyNames.addAll(dgcConfigProperties.getKeyAliases());
+                break;
             case ALL:
                 keyNames.addAll(dgcConfigProperties.getEncAliases());
                 keyNames.addAll(dgcConfigProperties.getSignAliases());
+                keyNames.addAll(dgcConfigProperties.getKeyAliases());
                 break;
             default:
                 throw new NotImplementedException(String.format("Key type '%s'", type));

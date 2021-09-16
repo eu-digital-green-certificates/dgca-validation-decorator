@@ -60,6 +60,8 @@ public class IdentityResponse {
         private String kid;
         
         private String alg;
+        
+        private String use;
     }
     
     @Data
