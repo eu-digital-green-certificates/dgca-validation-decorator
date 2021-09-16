@@ -21,19 +21,17 @@ dgc:
   keyStoreFile: certs/dev-decorator.jks
   keyStorePassword: changeMe
   privateKeyPassword: changeMe
-  #### activeSignKey must be one of signAliases  
-  activeSignKey: ValidationDecoratorSignKey-1
-  encAliases: 
-    - ValidationDecoratorEncKey-1
+  #### activeSignKey must be one of signAliases
+  activeSignKey: AccessTokenSignKey-1
+  encAliases:
   signAliases: 
-    - ValidationDecoratorSignKey-1
+    - AccessTokenSignKey-1
   keyAliases:
     - AccessTokenServiceKey-1
     - ServiceProviderKey-1
     - CancellationServiceKey-1
     - StatusServiceKey-1
-    - DccValidatorServiceKey-1
-
+    - ValidationServiceKey-1
   token:
     issuer: Validation Decorator Dervice
     type: JWT
