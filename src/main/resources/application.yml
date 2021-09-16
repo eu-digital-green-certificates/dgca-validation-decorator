@@ -40,25 +40,25 @@ dgc:
       validity: 3600
   #### Validation Service
   services:
-    - id: ${dgc.serviceUrl}/identity/ValidationService
+    - id: ${dgc.serviceUrl}/identity/ValidationService#ValidationService-1
       type: ValidationService
       serviceEndpoint: http://localhost:8081
       name: Validation Service
   #### Validation Decorator
   endpoints:
-    - id: ${dgc.serviceUrl}/identity/AccessTokenService
+    - id: ${dgc.serviceUrl}/identity/AccessTokenService#AccessTokenService-1
       type: AccessTokenService
       serviceEndpoint: ${dgc.serviceUrl}/token
       name: Validation Decorator Token
-    - id: ${dgc.serviceUrl}/identity/ServiceProvider
+    - id: ${dgc.serviceUrl}/identity/ServiceProvider#ServiceProvider-1
       type: ServiceProvider
       serviceEndpoint: ${dgc.serviceUrl}/identity
       name: Validation Decorator Identity
-    - id: ${dgc.serviceUrl}/identity/CancellationService
+    - id: ${dgc.serviceUrl}/identity/CancellationService#CancellationService-1
       type: CancellationService
       serviceEndpoint: ${dgc.serviceUrl}/reject
       name: Validation Decorator Reject
-    - id: ${dgc.serviceUrl}/identity/StatusService
+    - id: ${dgc.serviceUrl}/identity/StatusService#StatusService-1
       type: StatusService
       serviceEndpoint: ${dgc.serviceUrl}/status
       name: Validation Decorator Status
