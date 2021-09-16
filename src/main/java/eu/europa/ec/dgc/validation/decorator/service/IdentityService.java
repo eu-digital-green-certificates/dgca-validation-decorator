@@ -22,6 +22,7 @@ package eu.europa.ec.dgc.validation.decorator.service;
 
 import eu.europa.ec.dgc.validation.decorator.config.DgcProperties;
 import eu.europa.ec.dgc.validation.decorator.config.DgcProperties.ServiceProperties;
+import eu.europa.ec.dgc.validation.decorator.controller.IdentityController;
 import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse;
 import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse.PublicKeyJwkIdentityResponse;
 import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse.ServiceIdentityResponse;
@@ -42,7 +43,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class IdentityService {
 
-    private static final String IDENTITY_PATH = "/identity";
+    private static final String IDENTITY_PATH = IdentityController.PATH_ALL;
 
     private static final String VERIFICATION_TYPE = "JsonWebKey2020";
 
