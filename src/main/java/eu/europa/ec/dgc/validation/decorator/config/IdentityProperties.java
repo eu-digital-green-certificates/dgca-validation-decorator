@@ -37,5 +37,5 @@ public class IdentityProperties {
         
     private String consent;
     
-    private String servicePovider;
+    private String serviceProvider;
 }
