@@ -32,8 +32,6 @@ dgc:
     - ServiceProviderKey-1
     - CancellationServiceKey-1
     - StatusServiceKey-1
-    - DccValidatorServiceKey-1
-
   token:
     issuer: Validation Decorator Dervice
     type: JWT
