@@ -43,7 +43,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class IdentityService {
 
-    private static final String IDENTITY_PATH = "/identity/verificationMethod/"+VERIFCATION_TYPE;
+    private static final String IDENTITY_PATH = "/identity/verificationMethod/" + VERIFCATION_TYPE;
 
     private static final String VERIFICATION_TYPE = "JsonWebKey2020";
 
