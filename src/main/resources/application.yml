@@ -20,22 +20,26 @@ dgc:
   serviceUrl: http://localhost:8080
   keyStoreFile: certs/dev-decorator.jks
   keyStorePassword: changeMe
-  privateKeyPassword: changeMe  
-  activeSignKey: validationdecoratorsignkey
+  privateKeyPassword: changeMe
+  #### activeSignKey must be one of signAliases  
+  activeSignKey: ValidationDecoratorSignKey-1
   encAliases: 
-    - validationdecoratorenckey
+    - ValidationDecoratorEncKey-1
   signAliases: 
-    - validationdecoratorsignkey
+    - ValidationDecoratorSignKey-1
+  keyAliases:
+    - AccessTokenServiceKey-1
+    - ServiceProviderKey-1
+    - CancellationServiceKey-1
+    - StatusServiceKey-1
+    - DccValidatorServiceKey-1
+
   token:
-    provider: config #### use "ks" (keyStore) or "config"
     issuer: Validation Decorator Dervice
     type: JWT
-    algorithm: ES
-    keysize: 256
-    validity: 3600 #### in seconds. Expiration is calculated
-    publicKey: MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEIPrtYsW9+Juwp/mt7h8FJ3LgFRIUl2Vlmcl1DUm5gNHl0LnHIL4Jff6mg6yVhehdQiMvkhUtTvmFIUWONSJEnw==
-    privateKey: MEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCBSuPIbykwH24sjQsTneeN6EyjiA1NK5W7uca+HxmGmWw==
-    keyAlgorithm: EC
+    initialize:
+      #### in seconds. Expiration is calculated
+      validity: 3600
   #### Validation Service
   services:
     - id: ${dgc.serviceUrl}/identity/ValidationService
@@ -44,8 +48,8 @@ dgc:
       name: Validation Service
   #### Validation Decorator
   endpoints:
-    - id: ${dgc.serviceUrl}/identity/AccessCredentialService
-      type: AccessCredentialService
+    - id: ${dgc.serviceUrl}/identity/AccessTokenService
+      type: AccessTokenService
       serviceEndpoint: ${dgc.serviceUrl}/token
       name: Validation Decorator Token
     - id: ${dgc.serviceUrl}/identity/ServiceProvider

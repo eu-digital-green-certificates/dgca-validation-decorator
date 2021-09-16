@@ -47,7 +47,7 @@ public class IdentityService {
 
     private static final String VERIFICATION_TYPE = "JsonWebKey2020";
 
-    private static final String PUBLIC_KEY_ALGORITM = "ES256";
+    
 
     private final DgcProperties dgcProperties;
 
@@ -114,15 +114,16 @@ public class IdentityService {
     }
 
     private PublicKeyJwkIdentityResponse buildPublicKey(String keyName) {
-        final Certificate certificate = keyProvider.receiveCertificate(keyName);
-        final PublicKeyJwkIdentityResponse publicKeyJwk = new PublicKeyJwkIdentityResponse();
+        final Certificate certificate = keyProvider.receiveCertificate(keyName);        
         try {
+            final PublicKeyJwkIdentityResponse publicKeyJwk = new PublicKeyJwkIdentityResponse();
             publicKeyJwk.setX5c(Base64.getEncoder().encodeToString(certificate.getEncoded()));
             publicKeyJwk.setKid(keyProvider.getKid(keyName));
-            publicKeyJwk.setAlg(PUBLIC_KEY_ALGORITM);
+            publicKeyJwk.setAlg(keyProvider.getAlg(keyName));
+            publicKeyJwk.setUse(keyProvider.getKeyUse(keyName).name().toLowerCase());
+            return publicKeyJwk;
         } catch (CertificateEncodingException e) {
             throw new DccException("Can not encode certificate", e);
         }
-        return publicKeyJwk;
     }
 }
