@@ -24,7 +24,7 @@ dgc:
   #### activeSignKey must be one of signAliases
   activeSignKey: AccessTokenSignKey-1
   encAliases:
-  signAliases: 
+  signAliases:
     - AccessTokenSignKey-1
   keyAliases:
     - AccessTokenServiceKey-1
