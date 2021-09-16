@@ -47,7 +47,7 @@ public class InitializeService {
                 .token(accessTokenService.buildAccessToken(subject))
                 .consent(properties.getConsent())
                 .subject(subject)
-                .servicePovider(properties.getServicePovider())
+                .serviceProvider(properties.getServiceProvider())
                 .build();
     }    
 }

@@ -4,7 +4,7 @@ identity:
   #### serviceIdentity
   serviceIdentityUrl: https://validation-decorator.example
   consent: I want to check your DCC to confirm your booking! :)
-  servicePovider: Service Provider.com
+  serviceProvider: Service Provider.com
   restTemplate:
     connectionTimeout: 3000
     readTimeout: 3000
