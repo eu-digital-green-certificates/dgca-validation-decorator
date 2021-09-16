@@ -55,5 +55,5 @@ public class QrCodeDto {
 
     // Company Name
     // used from application.yml
-    private String servicePovider;
+    private String serviceProvider;
 }
