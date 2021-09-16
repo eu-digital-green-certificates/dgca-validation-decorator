@@ -62,7 +62,7 @@ public class ValidationStatusController {
         @ApiResponse(responseCode = "410", description = "Gone. Subject does not exist anymore"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    @GetMapping(value = PATH, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = PATH, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity reject(@RequestHeader("Authorization") final String token) {
         log.debug("Incoming GET request to '{}' with token '{}'", PATH, token);
         

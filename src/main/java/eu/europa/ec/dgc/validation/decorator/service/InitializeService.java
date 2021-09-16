@@ -44,7 +44,6 @@ public class InitializeService {
                 .protocol(properties.getProtocol())
                 .protocolVersion(properties.getProtocolVersion())
                 .serviceIdentity(properties.getServiceIdentityUrl())
-                //.validationIdentity(properties.getValidationIdentityUrl())
                 .token(accessTokenService.buildAccessToken(subject))
                 .consent(properties.getConsent())
                 .subject(subject)

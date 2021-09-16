@@ -3,8 +3,6 @@ identity:
   protocolVersion: 1.0.0
   #### serviceIdentity
   serviceIdentityUrl: https://validation-decorator.example
-  #### validationIdentity
-  validationIdentityUrl: https://validation-decorator.example/identity
   consent: I want to check your DCC to confirm your booking! :)
   servicePovider: Service Provider.com
   restTemplate:
@@ -15,11 +13,6 @@ booking:
   urls:
     tokenContent: http://localhost:8082/tokencontent/{subject}
     result: http://localhost:8082/result/{subject}
-
-validation:
-  urls:
-    identity: http://localhost:8081/identity
-    status: http://localhost:8081/status/{subject}
 
 #### Create Key: keytool -genkey -alias [ALIAS NAME] -keyalg EC -validity 3650 -keystore dev-decorator.jks -storetype JKS
 dgc:
@@ -53,14 +46,10 @@ dgc:
     keyAlgorithm: EC
   services:
     #### Validation Service
-    - id: http://localhost:8081/initialize
+    - id: http://localhost:8080/identity/ValidationService
       type: ValidationService
-      serviceEndpoint: http://localhost:8081/initialize
-      name: Validation Service Initialize
-    - id: http://localhost:8081/validate
-      type: DccValidatorService
-      serviceEndpoint: http://localhost:8081/validate
-      name: Validation Service Validate
+      serviceEndpoint: http://localhost:8081
+      name: Validation Service
     #### Validation Decorator
     - id: http://localhost:8080/token
       type: AccessCredentialService

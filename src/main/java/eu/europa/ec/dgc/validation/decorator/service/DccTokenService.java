@@ -74,14 +74,14 @@ public class DccTokenService {
         final ValidationServiceInitializeResponse initialize = validationServiceRepository
                 .initialize(service, dccToken, subject);
 
-        final BookingServiceTokenContentResponse tokenContent = bookingServiceRepository.tokenContent(subject);
+        final BookingServiceTokenContentResponse tokenContent = bookingServiceRepository.tokenContent(subject, service);
         if (tokenContent.getPassengers() == null || tokenContent.getPassengers().isEmpty()) {
             throw new NotFoundException("Passenger not found by subject");
         }
         final PassengerResponse passenger = tokenContent.getPassengers().get(0);
         final FlightInfoResponse flightInfo = tokenContent.getFlightInfo();
 
-        return buildAccessToken(subject, initialize, passenger, flightInfo);
+        return this.buildAccessToken(subject, initialize, passenger, flightInfo);
     }
 
     private AccessTokenPayload buildAccessToken(
@@ -89,7 +89,7 @@ public class DccTokenService {
             final ValidationServiceInitializeResponse initialize,
             final PassengerResponse passenger,
             final FlightInfoResponse flightInfo) {
-        AccessTokenConditions accessTokenConditions = new AccessTokenConditions();
+        final AccessTokenConditions accessTokenConditions = new AccessTokenConditions();
         accessTokenConditions.setLang("en-en"); // TODO Selected language
         accessTokenConditions.setFnt(passenger.getForename());
         accessTokenConditions.setGnt(passenger.getLastname());
@@ -106,7 +106,7 @@ public class DccTokenService {
         accessTokenConditions.setValidationClock(flightInfo.getArrivalTime().format(FORMATTER));
         accessTokenConditions.setValidTo(departureTime.plusDays(2).format(FORMATTER));
 
-        AccessTokenPayload accessTokenPayload = new AccessTokenPayload();
+        final AccessTokenPayload accessTokenPayload = new AccessTokenPayload();
         accessTokenPayload.setIss(dgcProperties.getToken().getIssuer());
         accessTokenPayload.setIat(Instant.now().getEpochSecond());
         accessTokenPayload.setExp(initialize.getExp());
