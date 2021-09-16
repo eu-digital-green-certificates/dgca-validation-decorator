@@ -29,9 +29,9 @@ import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse.VerificationId
 import eu.europa.ec.dgc.validation.decorator.entity.KeyType;
 import eu.europa.ec.dgc.validation.decorator.exception.DccException;
 import eu.europa.ec.dgc.validation.decorator.exception.NotFoundException;
+import io.vavr.collection.Stream;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -78,7 +78,7 @@ public class IdentityService {
         final IdentityResponse identityResponse = new IdentityResponse();
         identityResponse.setId(identityId);
         identityResponse.setVerificationMethod(verificationMethods);
-        identityResponse.setService(getServices());
+        identityResponse.setService(getServices(element, id));
         return identityResponse;
     }
 
@@ -98,19 +98,18 @@ public class IdentityService {
         throw new NotFoundException("Verification method not found. No ID available.");
     }
 
-    private List<ServiceIdentityResponse> getServices() {
-        List<ServiceIdentityResponse> services = new ArrayList<>();
-        if (dgcProperties.getServices() != null) {
-            dgcProperties.getServices().stream().map(service -> {
-                ServiceIdentityResponse response = new ServiceIdentityResponse();
-                response.setId(service.getId());
-                response.setType(service.getType());
-                response.setServiceEndpoint(service.getServiceEndpoint());
-                response.setName(service.getName());
-                return response;
-            }).forEach(services::add);
-        }
-        return services;
+    private List<ServiceIdentityResponse> getServices(final String element, final String id) {
+        // TODO impl filter for id
+        return Stream.concat(dgcProperties.getServices(), dgcProperties.getEndpoints())
+                .filter(service -> element == null || element.equalsIgnoreCase(service.getType()))
+                .map(service -> {
+                    final ServiceIdentityResponse response = new ServiceIdentityResponse();
+                    response.setId(service.getId());
+                    response.setType(service.getType());
+                    response.setServiceEndpoint(service.getServiceEndpoint());
+                    response.setName(service.getName());
+                    return response;
+                }).collect(Collectors.toList());
     }
 
     private PublicKeyJwkIdentityResponse buildPublicKey(String keyName) {

@@ -35,12 +35,6 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("dgc")
 public class DgcProperties {
 
-    private final GatewayDownload businessRulesDownload = new GatewayDownload();
-
-    private final GatewayDownload valueSetsDownload = new GatewayDownload();
-
-    private final GatewayDownload countryListDownload = new GatewayDownload();
-
     @DurationUnit(ChronoUnit.SECONDS)
     private Duration validationExpire = Duration.ofMinutes(60);
 
@@ -61,6 +55,8 @@ public class DgcProperties {
     private TokenProperties token;
     
     private List<ServiceProperties> services = new ArrayList<>();
+    
+    private List<ServiceProperties> endpoints = new ArrayList<>();
 
     @Data
     public static final class GatewayDownload {
