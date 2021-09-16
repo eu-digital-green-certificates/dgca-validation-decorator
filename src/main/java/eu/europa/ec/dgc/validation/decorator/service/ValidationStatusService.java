@@ -41,7 +41,7 @@ public class ValidationStatusService {
     private final ValidationServiceRepository validationServiceRepository;
 
     /**
-     * Determines the status of the validation service
+     * Determines the status of the validation service.
      * 
      * @param subject Subject ID
      * @return {@link ValidationServiceStatusResponse}
