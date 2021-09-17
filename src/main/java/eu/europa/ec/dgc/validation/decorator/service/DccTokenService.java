@@ -93,7 +93,9 @@ public class DccTokenService {
         accessTokenConditions.setLang(occurrenceInfo.getLanguage());
         accessTokenConditions.setFnt(subjectResponse.getForename());
         accessTokenConditions.setGnt(subjectResponse.getLastname());
-        accessTokenConditions.setDob(subjectResponse.getBirthDate().format(BIRTH_DATE_FORMATTER));
+        if (subjectResponse.getBirthDate() != null) {
+            accessTokenConditions.setDob(subjectResponse.getBirthDate().format(BIRTH_DATE_FORMATTER));
+        }
         accessTokenConditions.setCoa(occurrenceInfo.getCountryOfArrival());
         accessTokenConditions.setCod(occurrenceInfo.getCountryOfDeparture());
         accessTokenConditions.setRoa(occurrenceInfo.getRegionOfArrival());
