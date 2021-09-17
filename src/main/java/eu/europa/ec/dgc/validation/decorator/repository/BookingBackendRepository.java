@@ -21,8 +21,8 @@
 package eu.europa.ec.dgc.validation.decorator.repository;
 
 import eu.europa.ec.dgc.validation.decorator.config.DgcProperties.ServiceProperties;
-import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceResultRequest;
-import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceTokenContentResponse;
+import eu.europa.ec.dgc.validation.decorator.entity.ServiceResultRequest;
+import eu.europa.ec.dgc.validation.decorator.entity.ServiceTokenContentResponse;
 import eu.europa.ec.dgc.validation.decorator.service.AccessTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class BookingServiceRepository {
+public class BookingBackendRepository implements BackendRepository {
 
     private static final String PLACEHOLDER_SUBJECT = "{subject}";
 
@@ -58,7 +58,8 @@ public class BookingServiceRepository {
      * @param subject {@link String}
      * @return {@link BookingServiceTokenContentResponse}
      */
-    public BookingServiceTokenContentResponse tokenContent(final String subject) {
+    @Override
+    public ServiceTokenContentResponse tokenContent(final String subject) {
         return this.tokenContent(subject, null);
     }
 
@@ -69,7 +70,8 @@ public class BookingServiceRepository {
      * @param service Used service
      * @return {@link BookingServiceTokenContentResponse}
      */
-    public BookingServiceTokenContentResponse tokenContent(final String subject, final ServiceProperties service) {
+    @Override
+    public ServiceTokenContentResponse tokenContent(final String subject, final ServiceProperties service) {
         final UriComponentsBuilder urlBuilder = UriComponentsBuilder
                 .fromUriString(this.tokenContentUrl.replace(PLACEHOLDER_SUBJECT, subject));
         if (service != null) {
@@ -83,8 +85,8 @@ public class BookingServiceRepository {
         final HttpEntity<String> entity = new HttpEntity<>(headers);
 
         log.debug("REST Call to '{}' starting", url);
-        final ResponseEntity<BookingServiceTokenContentResponse> response = this.restTpl.exchange(url, HttpMethod.GET,
-                entity, BookingServiceTokenContentResponse.class);
+        final ResponseEntity<ServiceTokenContentResponse> response = this.restTpl.exchange(url, HttpMethod.GET,
+                entity, ServiceTokenContentResponse.class);
         return response.getBody();
     }
 
@@ -94,13 +96,14 @@ public class BookingServiceRepository {
      * @param subject {@link String}
      * @param body {@link BookingServiceResultRequest}
      */
-    public void result(final String subject, final BookingServiceResultRequest body) {
+    @Override
+    public void result(final String subject, final ServiceResultRequest body) {
         final String url = this.resultUrl.replace(PLACEHOLDER_SUBJECT, subject);
 
         final HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", accessTokenService.buildHeaderToken(subject));
 
-        final HttpEntity<BookingServiceResultRequest> entity = new HttpEntity<>(body, headers);
+        final HttpEntity<ServiceResultRequest> entity = new HttpEntity<>(body, headers);
 
         log.debug("REST Call to '{}' starting", url);
         this.restTpl.exchange(url, HttpMethod.PUT, entity, String.class);

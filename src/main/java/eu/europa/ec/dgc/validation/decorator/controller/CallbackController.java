@@ -22,7 +22,7 @@ package eu.europa.ec.dgc.validation.decorator.controller;
 
 import eu.europa.ec.dgc.validation.decorator.dto.CallbackRequest;
 import eu.europa.ec.dgc.validation.decorator.service.AccessTokenService;
-import eu.europa.ec.dgc.validation.decorator.service.BookingService;
+import eu.europa.ec.dgc.validation.decorator.service.BackendService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -48,7 +48,7 @@ public class CallbackController {
 
     private final AccessTokenService accessTokenService;
     
-    private final BookingService bookingService;
+    private final BackendService backendService;
     
     /**
      * Callback endpoint receives the validation result to a subject.
@@ -69,14 +69,14 @@ public class CallbackController {
             @PathVariable(value = "subject", required = true) final String subject,
             @RequestHeader("Authorization") final String token,
             @RequestHeader("X-Version") final String version, 
-            @Valid @RequestBody CallbackRequest request) {
+            @Valid @RequestBody final CallbackRequest request) {
         log.debug("Incoming PUT request to '{}' with subject '{}'", PATH, subject);
         
         if (accessTokenService.isValid(token)) {
             final Map<String, String> tokenContent = accessTokenService.parseAccessToken(token);
             if (tokenContent.containsKey("sub") && tokenContent.get("sub") != null) {
                 
-                bookingService.saveResult(subject, request);
+                this.backendService.saveResult(subject, request);
                 return ResponseEntity.ok().build();
             }
         }

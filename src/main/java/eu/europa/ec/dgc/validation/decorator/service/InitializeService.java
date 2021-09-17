@@ -49,5 +49,5 @@ public class InitializeService {
                 .subject(subject)
                 .serviceProvider(properties.getServiceProvider())
                 .build();
-    }    
+    }
 }

@@ -29,18 +29,26 @@ import java.util.UUID;
 import lombok.Data;
 
 @Data
-public class BookingServiceTokenContentResponse {
+public class ServiceTokenContentResponse {
 
     private String reference;
 
     private OffsetDateTime time;
 
-    private List<PassengerResponse> passengers = new ArrayList<>();
+    private List<SubjectResponse> passengers = new ArrayList<>();
 
-    private FlightInfoResponse flightInfo;
+    private OccurrenceInfoResponse flightInfo;
+    
+    public List<SubjectResponse> getSubjects() {
+        return this.getPassengers();
+    }
+    
+    public OccurrenceInfoResponse getOccurrenceInfo() {
+        return this.getFlightInfo();
+    }
 
     @Data
-    public static final class PassengerResponse {
+    public static final class SubjectResponse {
 
         private UUID id;
 
@@ -51,7 +59,7 @@ public class BookingServiceTokenContentResponse {
         private LocalDate birthDate;
 
         private DccStatusResponse dccStatus;
-        
+
         private String serviceIdUsed;
     }
 
@@ -82,14 +90,14 @@ public class BookingServiceTokenContentResponse {
     }
 
     @Data
-    public static final class FlightInfoResponse {
+    public static final class OccurrenceInfoResponse {
 
         private String from;
 
         private String to;
 
         private OffsetDateTime time;
-        
+
         @JsonProperty("coa")
         private String countryOfArrival;
 
@@ -107,5 +115,14 @@ public class BookingServiceTokenContentResponse {
 
         @JsonProperty("arrivalTime")
         private OffsetDateTime arrivalTime;
+
+        private int type;
+
+        private List<String> categories;
+
+        @JsonProperty("lang")
+        private String language;
+
+        private List<String> conditionTypes;
     }
 }
