@@ -1,6 +1,6 @@
 /*-
  * ---license-start
- * European Digital COVID Certificate Booking Demo / dgca-booking-demo-backend
+ * European Digital COVID Certificate Validation Decorator Service / dgca-validation-decorator
  * ---
  * Copyright (C) 2021 T-Systems International GmbH and all other contributors
  * ---
@@ -21,12 +21,12 @@
 package eu.europa.ec.dgc.validation.decorator.service;
 
 import eu.europa.ec.dgc.validation.decorator.config.DgcProperties.ServiceProperties;
-import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceTokenContentResponse;
-import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceTokenContentResponse.PassengerResponse;
+import eu.europa.ec.dgc.validation.decorator.entity.ServiceTokenContentResponse;
+import eu.europa.ec.dgc.validation.decorator.entity.ServiceTokenContentResponse.SubjectResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceStatusResponse;
 import eu.europa.ec.dgc.validation.decorator.exception.NotFoundException;
 import eu.europa.ec.dgc.validation.decorator.exception.UncheckedUnsupportedEncodingException;
-import eu.europa.ec.dgc.validation.decorator.repository.BookingServiceRepository;
+import eu.europa.ec.dgc.validation.decorator.repository.BackendRepository;
 import eu.europa.ec.dgc.validation.decorator.repository.ValidationServiceRepository;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -38,7 +38,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ValidationStatusService {
 
-    private final BookingServiceRepository bookingServiceRepository;
+    private final BackendRepository backendRepository;
 
     private final IdentityService identityService;
 
@@ -51,13 +51,13 @@ public class ValidationStatusService {
      * @return {@link ValidationServiceStatusResponse}
      */
     public ValidationServiceStatusResponse determineStatus(final String subject) {
-        final BookingServiceTokenContentResponse tokenContent = bookingServiceRepository.tokenContent(subject);
-        if (tokenContent.getPassengers() == null || tokenContent.getPassengers().isEmpty()) {
+        final ServiceTokenContentResponse tokenContent = backendRepository.tokenContent(subject);
+        if (tokenContent.getSubjects() == null || tokenContent.getSubjects().isEmpty()) {
             throw new NotFoundException("Passenger not found by subject");
         }
 
-        final PassengerResponse passenger = tokenContent.getPassengers().get(0);
-        final String serviceId = passenger.getServiceIdUsed();
+        final SubjectResponse subjectResponse = tokenContent.getSubjects().get(0);
+        final String serviceId = subjectResponse.getServiceIdUsed();
         if (serviceId == null || serviceId.isBlank()) {
             throw new NotFoundException("Passenger without service ID");
         }

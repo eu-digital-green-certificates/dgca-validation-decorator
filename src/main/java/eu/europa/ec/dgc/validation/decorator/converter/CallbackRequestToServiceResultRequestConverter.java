@@ -22,23 +22,23 @@ package eu.europa.ec.dgc.validation.decorator.converter;
 
 import eu.europa.ec.dgc.validation.decorator.dto.CallbackRequest;
 import eu.europa.ec.dgc.validation.decorator.dto.CallbackRequest.Result;
-import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceResultRequest;
-import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceResultRequest.DccStatusRequest;
-import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceResultRequest.DccStatusResult;
-import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceResultRequest.DccStatusType;
-import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceResultRequest.ResultRequest;
+import eu.europa.ec.dgc.validation.decorator.entity.ServiceResultRequest;
+import eu.europa.ec.dgc.validation.decorator.entity.ServiceResultRequest.DccStatusRequest;
+import eu.europa.ec.dgc.validation.decorator.entity.ServiceResultRequest.DccStatusResult;
+import eu.europa.ec.dgc.validation.decorator.entity.ServiceResultRequest.DccStatusType;
+import eu.europa.ec.dgc.validation.decorator.entity.ServiceResultRequest.ResultRequest;
 import eu.europa.ec.dgc.validation.decorator.exception.NotFoundException;
 import java.util.stream.Collectors;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CallbackRequestToBookingServiceResultRequestConverter
-        implements Converter<CallbackRequest, BookingServiceResultRequest> {
+public class CallbackRequestToServiceResultRequestConverter
+        implements Converter<CallbackRequest, ServiceResultRequest> {
 
     @Override
-    public BookingServiceResultRequest convert(CallbackRequest callback) {
-        BookingServiceResultRequest result = new BookingServiceResultRequest();
+    public ServiceResultRequest convert(CallbackRequest callback) {
+        ServiceResultRequest result = new ServiceResultRequest();
         result.setDccStatus(new DccStatusRequest());
         result.getDccStatus().setIssuer(callback.getIssuer());
         result.getDccStatus().setIat(callback.getIat());

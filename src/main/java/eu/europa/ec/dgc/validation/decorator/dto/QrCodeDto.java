@@ -43,7 +43,7 @@ public class QrCodeDto {
     // used from application.yml
     // currently disabled // private String validationIdentity;
 
-    // JWT for access Validation Decorator from booking service 
+    // JWT for access Validation Decorator from backend service 
     private String token;
 
     // Consent text which is shown to the user by the wallet app

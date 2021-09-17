@@ -25,13 +25,13 @@ import eu.europa.ec.dgc.validation.decorator.config.DgcProperties.ServicePropert
 import eu.europa.ec.dgc.validation.decorator.dto.AccessTokenPayload;
 import eu.europa.ec.dgc.validation.decorator.dto.AccessTokenPayload.AccessTokenConditions;
 import eu.europa.ec.dgc.validation.decorator.dto.DccTokenRequest;
-import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceTokenContentResponse;
-import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceTokenContentResponse.FlightInfoResponse;
-import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceTokenContentResponse.PassengerResponse;
+import eu.europa.ec.dgc.validation.decorator.entity.ServiceTokenContentResponse;
+import eu.europa.ec.dgc.validation.decorator.entity.ServiceTokenContentResponse.OccurrenceInfoResponse;
+import eu.europa.ec.dgc.validation.decorator.entity.ServiceTokenContentResponse.SubjectResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceInitializeResponse;
 import eu.europa.ec.dgc.validation.decorator.exception.NotFoundException;
 import eu.europa.ec.dgc.validation.decorator.exception.NotImplementedException;
-import eu.europa.ec.dgc.validation.decorator.repository.BookingServiceRepository;
+import eu.europa.ec.dgc.validation.decorator.repository.BackendRepository;
 import eu.europa.ec.dgc.validation.decorator.repository.ValidationServiceRepository;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -53,12 +53,12 @@ public class DccTokenService {
 
     private final ValidationServiceRepository validationServiceRepository;
 
-    private final BookingServiceRepository bookingServiceRepository;
+    private final BackendRepository backendRepository;
 
     private final IdentityService identityService;
 
     /**
-     * Request validation- and booking service to create token.
+     * Request validation- and backend service to create token.
      * 
      * @param dccToken {@link DccTokenRequest}
      * @return {@link AccessTokenPayload}
@@ -73,37 +73,37 @@ public class DccTokenService {
         final ValidationServiceInitializeResponse initialize = validationServiceRepository
                 .initialize(service, dccToken, subject);
 
-        final BookingServiceTokenContentResponse tokenContent = bookingServiceRepository.tokenContent(subject, service);
-        if (tokenContent.getPassengers() == null || tokenContent.getPassengers().isEmpty()) {
+        final ServiceTokenContentResponse tokenContent = backendRepository.tokenContent(subject, service);
+        if (tokenContent.getSubjects() == null || tokenContent.getSubjects().isEmpty()) {
             throw new NotFoundException("Passenger not found by subject");
         }
-        final PassengerResponse passenger = tokenContent.getPassengers().get(0);
-        final FlightInfoResponse flightInfo = tokenContent.getFlightInfo();
+        final SubjectResponse subjectResponse = tokenContent.getSubjects().get(0);
+        final OccurrenceInfoResponse occurrenceInfo = tokenContent.getOccurrenceInfo();
 
-        return this.buildAccessToken(subject, initialize, passenger, flightInfo);
+        return this.buildAccessToken(subject, initialize, subjectResponse, occurrenceInfo);
     }
 
     private AccessTokenPayload buildAccessToken(
             final String subject,
             final ValidationServiceInitializeResponse initialize,
-            final PassengerResponse passenger,
-            final FlightInfoResponse flightInfo) {
+            final SubjectResponse subjectResponse,
+            final OccurrenceInfoResponse occurrenceInfo) {
         final AccessTokenConditions accessTokenConditions = new AccessTokenConditions();
         //  TODO add hash
-        accessTokenConditions.setLang(flightInfo.getLanguage());
-        accessTokenConditions.setFnt(passenger.getForename());
-        accessTokenConditions.setGnt(passenger.getLastname());
-        accessTokenConditions.setDob(passenger.getBirthDate().format(BIRTH_DATE_FORMATTER));
-        accessTokenConditions.setCoa(flightInfo.getCountryOfArrival());
-        accessTokenConditions.setCod(flightInfo.getCountryOfDeparture());
-        accessTokenConditions.setRoa(flightInfo.getRegionOfArrival());
-        accessTokenConditions.setRod(flightInfo.getRegionOfDeparture());
-        accessTokenConditions.setType(flightInfo.getConditionTypes());
-        accessTokenConditions.setCategory(flightInfo.getCategories());
+        accessTokenConditions.setLang(occurrenceInfo.getLanguage());
+        accessTokenConditions.setFnt(subjectResponse.getForename());
+        accessTokenConditions.setGnt(subjectResponse.getLastname());
+        accessTokenConditions.setDob(subjectResponse.getBirthDate().format(BIRTH_DATE_FORMATTER));
+        accessTokenConditions.setCoa(occurrenceInfo.getCountryOfArrival());
+        accessTokenConditions.setCod(occurrenceInfo.getCountryOfDeparture());
+        accessTokenConditions.setRoa(occurrenceInfo.getRegionOfArrival());
+        accessTokenConditions.setRod(occurrenceInfo.getRegionOfDeparture());
+        accessTokenConditions.setType(occurrenceInfo.getConditionTypes());
+        accessTokenConditions.setCategory(occurrenceInfo.getCategories());
 
-        final OffsetDateTime departureTime = flightInfo.getDepartureTime();
+        final OffsetDateTime departureTime = occurrenceInfo.getDepartureTime();
         accessTokenConditions.setValidFrom(departureTime.format(FORMATTER));
-        accessTokenConditions.setValidationClock(flightInfo.getArrivalTime().format(FORMATTER));
+        accessTokenConditions.setValidationClock(occurrenceInfo.getArrivalTime().format(FORMATTER));
         accessTokenConditions.setValidTo(departureTime.plusDays(2).format(FORMATTER));
 
         final AccessTokenPayload accessTokenPayload = new AccessTokenPayload();
@@ -113,7 +113,7 @@ public class DccTokenService {
         accessTokenPayload.setExp(initialize.getExp());
         accessTokenPayload.setSub(subject);
         accessTokenPayload.setAud(initialize.getAud());
-        accessTokenPayload.setType(flightInfo.getType());
+        accessTokenPayload.setType(occurrenceInfo.getType());
         accessTokenPayload.setConditions(accessTokenConditions);
         accessTokenPayload.setVersion("1.0");
         return accessTokenPayload;

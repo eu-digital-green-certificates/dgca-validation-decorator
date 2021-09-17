@@ -21,17 +21,17 @@
 package eu.europa.ec.dgc.validation.decorator.service;
 
 import eu.europa.ec.dgc.validation.decorator.dto.CallbackRequest;
-import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceResultRequest;
-import eu.europa.ec.dgc.validation.decorator.repository.BookingServiceRepository;
+import eu.europa.ec.dgc.validation.decorator.entity.ServiceResultRequest;
+import eu.europa.ec.dgc.validation.decorator.repository.BackendRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class BookingService {
+public class BackendService {
 
-    private final BookingServiceRepository bookingServiceRepository;
+    private final BackendRepository backendRepository;
 
     private final ConversionService converter;
 
@@ -41,9 +41,8 @@ public class BookingService {
      * @param subject {@link String}
      * @param request {@link CallbackRequest}
      */
-    public void saveResult(String subject, CallbackRequest request) {
-        final BookingServiceResultRequest resultRequest = this.converter
-                .convert(request, BookingServiceResultRequest.class);
-        bookingServiceRepository.result(subject, resultRequest);
+    public void saveResult(final String subject, final CallbackRequest request) {
+        final ServiceResultRequest resultRequest = this.converter.convert(request, ServiceResultRequest.class);
+        this.backendRepository.result(subject, resultRequest);
     }
 }
