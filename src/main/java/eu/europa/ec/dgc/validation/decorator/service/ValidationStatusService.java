@@ -57,17 +57,19 @@ public class ValidationStatusService {
         }
 
         final PassengerResponse passenger = tokenContent.getPassengers().get(0);
-        String serviceId;
-        try {
-            serviceId = URLDecoder.decode(passenger.getServiceIdUsed(), StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new UncheckedUnsupportedEncodingException(e);
-        }
+        final String serviceId = passenger.getServiceIdUsed();
         if (serviceId == null || serviceId.isBlank()) {
             throw new NotFoundException("Passenger without service ID");
         }
 
-        final ServiceProperties service = identityService.getServicePropertiesById(serviceId);
+        String decodedServiceId;
+        try {
+            decodedServiceId = URLDecoder.decode(serviceId, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new UncheckedUnsupportedEncodingException(e);
+        }
+
+        final ServiceProperties service = identityService.getServicePropertiesById(decodedServiceId);
         return validationServiceRepository.status(service, subject);
     }
 }
