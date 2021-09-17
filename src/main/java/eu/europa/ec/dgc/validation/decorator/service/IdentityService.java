@@ -43,8 +43,14 @@ import org.springframework.stereotype.Service;
 public class IdentityService {
 
     private static final String VERIFICATION_TYPE = "JsonWebKey2020";
-    
-    private static final String IDENTITY_PATH = "/identity/verificationMethod/" + VERIFICATION_TYPE;
+
+    private static final String IDENTITY_ROOT = "/identity";
+
+    private static final String IDENTITY_PATH = IDENTITY_ROOT + "/verificationMethod/" + VERIFICATION_TYPE;
+
+    private static final String ELEMENT_VERIFICATION_METHOD = "verificationMethod";
+
+    private static final String ELEMENT_SERVICE = "service";
 
     private final DgcProperties dgcProperties;
 
@@ -54,30 +60,34 @@ public class IdentityService {
      * Create identity Object with given informations.
      * 
      * @param element Element
-     * @param id ID
+     * @param type Type
      * @return {@link IdentityResponse}
      */
-    public IdentityResponse getIdentity(final String element, final String id) {
-        // TODO impl filter for id
-
-        final String identityId = String.format("%s%s", dgcProperties.getServiceUrl(), IDENTITY_PATH);
-
-        final List<VerificationIdentityResponse> verificationMethods = keyProvider.getKeyNames(KeyType.ALL).stream()
-                .filter(keyName -> element == null || element.equalsIgnoreCase(keyName))
-                .map(keyName -> {
-                    final VerificationIdentityResponse verificationMethod = new VerificationIdentityResponse();
-                    verificationMethod.setId(String.format("%s/%s", identityId, keyName));
-                    verificationMethod.setController(identityId);
-                    verificationMethod.setType(VERIFICATION_TYPE);
-                    verificationMethod.setPublicKeyJwk(buildPublicKey(keyName));
-                    return verificationMethod;
-                }).collect(Collectors.toList());
+    public IdentityResponse getIdentity(final String element, final String type) {
+        final String identityId = String.format("%s%s", dgcProperties.getServiceUrl(), IDENTITY_ROOT);
 
         final IdentityResponse identityResponse = new IdentityResponse();
         identityResponse.setId(identityId);
-        identityResponse.setVerificationMethod(verificationMethods);
-        identityResponse.setService(getServices(element, id));
+        identityResponse.setVerificationMethod(getVerificationMethods(element, type));
+        identityResponse.setService(getServices(element, type));
         return identityResponse;
+    }
+
+    private List<VerificationIdentityResponse> getVerificationMethods(final String element, final String type) {
+        final String identityPath = String.format("%s%s", dgcProperties.getServiceUrl(), IDENTITY_PATH);
+
+        return keyProvider.getKeyNames(KeyType.ALL).stream()
+                .filter(keyName -> element == null || ELEMENT_VERIFICATION_METHOD.equalsIgnoreCase(element))
+                .map(keyName -> {
+                    final VerificationIdentityResponse verificationMethod = new VerificationIdentityResponse();
+                    verificationMethod.setId(String.format("%s/%s", identityPath, keyName));
+                    verificationMethod.setController(identityPath);
+                    verificationMethod.setType(VERIFICATION_TYPE);
+                    verificationMethod.setPublicKeyJwk(buildPublicKey(keyName));
+                    return verificationMethod;
+                })
+                .filter(method -> type == null || type.equalsIgnoreCase(method.getType()))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -96,10 +106,9 @@ public class IdentityService {
         throw new NotFoundException("Verification method not found. No ID available.");
     }
 
-    private List<ServiceIdentityResponse> getServices(final String element, final String id) {
-        // TODO impl filter for id
+    private List<ServiceIdentityResponse> getServices(final String element, final String type) {
         return Stream.concat(dgcProperties.getServices(), dgcProperties.getEndpoints())
-                .filter(service -> element == null || element.equalsIgnoreCase(service.getType()))
+                .filter(service -> element == null || ELEMENT_SERVICE.equalsIgnoreCase(element))
                 .map(service -> {
                     final ServiceIdentityResponse response = new ServiceIdentityResponse();
                     response.setId(service.getId());
@@ -107,11 +116,13 @@ public class IdentityService {
                     response.setServiceEndpoint(service.getServiceEndpoint());
                     response.setName(service.getName());
                     return response;
-                }).collect(Collectors.toList());
+                })
+                .filter(method -> type == null || type.equalsIgnoreCase(method.getType()))
+                .collect(Collectors.toList());
     }
 
     private PublicKeyJwkIdentityResponse buildPublicKey(String keyName) {
-        final Certificate certificate = keyProvider.receiveCertificate(keyName);        
+        final Certificate certificate = keyProvider.receiveCertificate(keyName);
         try {
             final PublicKeyJwkIdentityResponse publicKeyJwk = new PublicKeyJwkIdentityResponse();
             publicKeyJwk.setX5c(Base64.getEncoder().encodeToString(certificate.getEncoded()));

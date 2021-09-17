@@ -63,7 +63,7 @@ public class ValidationStatusController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     @GetMapping(value = PATH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity reject(@RequestHeader("Authorization") final String token) {
+    public ResponseEntity status(@RequestHeader("Authorization") final String token) {
         log.debug("Incoming GET request to '{}' with token '{}'", PATH, token);
         
         if (accessTokenService.isValid(token)) {
