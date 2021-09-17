@@ -25,8 +25,12 @@ import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceTokenContentRe
 import eu.europa.ec.dgc.validation.decorator.entity.BookingServiceTokenContentResponse.PassengerResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceStatusResponse;
 import eu.europa.ec.dgc.validation.decorator.exception.NotFoundException;
+import eu.europa.ec.dgc.validation.decorator.exception.UncheckedUnsupportedEncodingException;
 import eu.europa.ec.dgc.validation.decorator.repository.BookingServiceRepository;
 import eu.europa.ec.dgc.validation.decorator.repository.ValidationServiceRepository;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +57,12 @@ public class ValidationStatusService {
         }
 
         final PassengerResponse passenger = tokenContent.getPassengers().get(0);
-        final String serviceId = passenger.getServiceIdUsed();
+        String serviceId;
+        try {
+            serviceId = URLDecoder.decode(passenger.getServiceIdUsed(), StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new UncheckedUnsupportedEncodingException(e);
+        }
         if (serviceId == null || serviceId.isBlank()) {
             throw new NotFoundException("Passenger without service ID");
         }
