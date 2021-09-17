@@ -22,7 +22,6 @@ package eu.europa.ec.dgc.validation.decorator.service;
 
 import eu.europa.ec.dgc.validation.decorator.config.DgcProperties;
 import eu.europa.ec.dgc.validation.decorator.config.DgcProperties.ServiceProperties;
-import eu.europa.ec.dgc.validation.decorator.controller.IdentityController;
 import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse;
 import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse.PublicKeyJwkIdentityResponse;
 import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse.ServiceIdentityResponse;

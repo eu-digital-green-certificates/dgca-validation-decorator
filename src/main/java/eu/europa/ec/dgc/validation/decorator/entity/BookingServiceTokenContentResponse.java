@@ -51,7 +51,7 @@ public class BookingServiceTokenContentResponse {
         private LocalDate birthDate;
 
         private DccStatusResponse dccStatus;
-        
+
         private String serviceIdUsed;
     }
 
@@ -89,7 +89,7 @@ public class BookingServiceTokenContentResponse {
         private String to;
 
         private OffsetDateTime time;
-        
+
         @JsonProperty("coa")
         private String countryOfArrival;
 
@@ -107,5 +107,14 @@ public class BookingServiceTokenContentResponse {
 
         @JsonProperty("arrivalTime")
         private OffsetDateTime arrivalTime;
+
+        private int type;
+
+        private List<String> categories;
+
+        @JsonProperty("lang")
+        private String language;
+
+        private List<String> conditionTypes;
     }
 }

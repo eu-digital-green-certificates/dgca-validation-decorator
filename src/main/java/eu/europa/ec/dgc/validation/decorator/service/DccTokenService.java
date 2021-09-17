@@ -36,7 +36,6 @@ import eu.europa.ec.dgc.validation.decorator.repository.ValidationServiceReposit
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -90,7 +89,8 @@ public class DccTokenService {
             final PassengerResponse passenger,
             final FlightInfoResponse flightInfo) {
         final AccessTokenConditions accessTokenConditions = new AccessTokenConditions();
-        accessTokenConditions.setLang("en-en"); // TODO Selected language
+        //  TODO add hash
+        accessTokenConditions.setLang(flightInfo.getLanguage());
         accessTokenConditions.setFnt(passenger.getForename());
         accessTokenConditions.setGnt(passenger.getLastname());
         accessTokenConditions.setDob(passenger.getBirthDate().format(BIRTH_DATE_FORMATTER));
@@ -98,8 +98,8 @@ public class DccTokenService {
         accessTokenConditions.setCod(flightInfo.getCountryOfDeparture());
         accessTokenConditions.setRoa(flightInfo.getRegionOfArrival());
         accessTokenConditions.setRod(flightInfo.getRegionOfDeparture());
-        accessTokenConditions.setType(Arrays.asList("r", "v", "t")); // TODO dynamic
-        accessTokenConditions.setCategory(Arrays.asList("Standard")); // TODO dynamic 
+        accessTokenConditions.setType(flightInfo.getConditionTypes());
+        accessTokenConditions.setCategory(flightInfo.getCategories());
 
         final OffsetDateTime departureTime = flightInfo.getDepartureTime();
         accessTokenConditions.setValidFrom(departureTime.format(FORMATTER));
@@ -107,12 +107,13 @@ public class DccTokenService {
         accessTokenConditions.setValidTo(departureTime.plusDays(2).format(FORMATTER));
 
         final AccessTokenPayload accessTokenPayload = new AccessTokenPayload();
-        accessTokenPayload.setIss(dgcProperties.getToken().getIssuer());
+        //  TODO add jti
+        accessTokenPayload.setIss(this.dgcProperties.getToken().getIssuer());
         accessTokenPayload.setIat(Instant.now().getEpochSecond());
         accessTokenPayload.setExp(initialize.getExp());
         accessTokenPayload.setSub(subject);
         accessTokenPayload.setAud(initialize.getAud());
-        accessTokenPayload.setType(2);
+        accessTokenPayload.setType(flightInfo.getType());
         accessTokenPayload.setConditions(accessTokenConditions);
         accessTokenPayload.setVersion("1.0");
         return accessTokenPayload;
