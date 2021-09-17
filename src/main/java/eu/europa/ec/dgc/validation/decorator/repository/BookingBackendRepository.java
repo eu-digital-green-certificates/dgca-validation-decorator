@@ -24,6 +24,8 @@ import eu.europa.ec.dgc.validation.decorator.config.DgcProperties.ServicePropert
 import eu.europa.ec.dgc.validation.decorator.entity.ServiceResultRequest;
 import eu.europa.ec.dgc.validation.decorator.entity.ServiceTokenContentResponse;
 import eu.europa.ec.dgc.validation.decorator.service.AccessTokenService;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -74,8 +76,13 @@ public class BookingBackendRepository implements BackendRepository {
     public ServiceTokenContentResponse tokenContent(final String subject, final ServiceProperties service) {
         final UriComponentsBuilder urlBuilder = UriComponentsBuilder
                 .fromUriString(this.tokenContentUrl.replace(PLACEHOLDER_SUBJECT, subject));
-        if (service != null) {
-            urlBuilder.queryParam("service", service.getId());
+        
+        String serviceIdBase64 = null;
+        if (service != null && service.getId() != null) {
+            log.debug("Receive service ID to booking service '{}'", service.getId());
+            serviceIdBase64 = Base64.getUrlEncoder().withoutPadding()
+                    .encodeToString(service.getId().getBytes(StandardCharsets.UTF_8));
+            urlBuilder.queryParam("service", serviceIdBase64);
         }
         final String url = urlBuilder.toUriString();
 
@@ -84,6 +91,7 @@ public class BookingBackendRepository implements BackendRepository {
 
         final HttpEntity<String> entity = new HttpEntity<>(headers);
 
+        log.debug("Send service ID (encoded) to booking service '{}'", serviceIdBase64);
         log.debug("REST Call to '{}' starting", url);
         final ResponseEntity<ServiceTokenContentResponse> response = this.restTpl.exchange(url, HttpMethod.GET,
                 entity, ServiceTokenContentResponse.class);

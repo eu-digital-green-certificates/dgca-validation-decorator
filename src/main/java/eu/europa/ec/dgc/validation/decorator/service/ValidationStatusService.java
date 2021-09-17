@@ -25,15 +25,15 @@ import eu.europa.ec.dgc.validation.decorator.entity.ServiceTokenContentResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.ServiceTokenContentResponse.SubjectResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceStatusResponse;
 import eu.europa.ec.dgc.validation.decorator.exception.NotFoundException;
-import eu.europa.ec.dgc.validation.decorator.exception.UncheckedUnsupportedEncodingException;
 import eu.europa.ec.dgc.validation.decorator.repository.BackendRepository;
 import eu.europa.ec.dgc.validation.decorator.repository.ValidationServiceRepository;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ValidationStatusService {
@@ -58,18 +58,16 @@ public class ValidationStatusService {
 
         final SubjectResponse subjectResponse = tokenContent.getSubjects().get(0);
         final String serviceId = subjectResponse.getServiceIdUsed();
+        log.debug("Receive service ID (encoded) from booking service '{}'", serviceId);
         if (serviceId == null || serviceId.isBlank()) {
             throw new NotFoundException("Passenger without service ID");
         }
-
-        String decodedServiceId;
-        try {
-            decodedServiceId = URLDecoder.decode(serviceId, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new UncheckedUnsupportedEncodingException(e);
-        }
+        
+        final String decodedServiceId = new String(Base64.getUrlDecoder().decode(serviceId), StandardCharsets.UTF_8);
+        log.debug("Receive service ID (decoded) from booking service '{}'", decodedServiceId);
 
         final ServiceProperties service = identityService.getServicePropertiesById(decodedServiceId);
+        log.debug("Receive service: {}", service);
         return validationServiceRepository.status(service, subject);
     }
 }
