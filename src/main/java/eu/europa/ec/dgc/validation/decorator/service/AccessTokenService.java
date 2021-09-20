@@ -21,6 +21,7 @@
 package eu.europa.ec.dgc.validation.decorator.service;
 
 import eu.europa.ec.dgc.validation.decorator.config.DgcProperties;
+import eu.europa.ec.dgc.validation.decorator.dto.AccessTokenPayload;
 import eu.europa.ec.dgc.validation.decorator.exception.DccException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -32,6 +33,7 @@ import java.security.PublicKey;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -50,7 +52,7 @@ public class AccessTokenService {
      * This token is generated an default header token without 'Bearer' prefix.
      */
     public String buildHeaderToken() {
-        return String.format("%s%s", TOKEN_PREFIX, buildAccessToken());
+        return String.format("%s%s", TOKEN_PREFIX, this.buildAccessToken());
     }
 
     /**
@@ -59,15 +61,15 @@ public class AccessTokenService {
      * @param subject Subject
      * @return {@link String} JWT token
      */
-    public String buildHeaderToken(String subject) {
-        return String.format("%s%s", TOKEN_PREFIX, buildAccessToken(subject));
+    public String buildHeaderToken(final String subject) {
+        return String.format("%s%s", TOKEN_PREFIX, this.buildAccessToken(subject));
     }
 
     /**
      * This token is generated an default access token without claims.
      */
     public String buildAccessToken() {
-        return getAccessTokenBuilder()
+        return this.getAccessTokenBuilder()
                 .compact();
     }
 
@@ -78,9 +80,25 @@ public class AccessTokenService {
      * @return {@link String} JWT token
      */
     public String buildAccessToken(final String subject) {
-        return getAccessTokenBuilder()
+        return this.getAccessTokenBuilder()
                 .addClaims(Collections.singletonMap("sub", subject))
                 .compact();
+    }
+
+    public String buildAccessToken(final AccessTokenPayload payload) {
+        final Map<String, Object> claims = new HashMap<>();
+        claims.put("jti", payload.getJti());
+        claims.put("sub", payload.getSub());
+        claims.put("aud", payload.getAud());
+        claims.put("iat", payload.getIat());
+        claims.put("t", payload.getType());
+        claims.put("v", payload.getVersion());
+        claims.put("vc", payload.getConditions());
+
+        final JwtBuilder builder = this.getAccessTokenBuilder()
+                .setExpiration(new Date(payload.getExp()))
+                .addClaims(claims);
+        return builder.compact();
     }
 
     /**
@@ -89,14 +107,14 @@ public class AccessTokenService {
      * @param token with or without prefix
      * @return {@link Map} with {@link String} as key and {@link String} as value
      */
-    public Map<String, String> parseAccessToken(String token) {
+    public Map<String, String> parseAccessToken(final String token) {
         final String tokenContent = token.startsWith(TOKEN_PREFIX) ? token.replace(TOKEN_PREFIX, "") : token;
         final String activeSignKey = this.keyProvider.getActiveSignKey();
         final PublicKey publicKey = this.keyProvider.receiveCertificate(activeSignKey).getPublicKey();
 
         final Jws<Claims> parsedToken = Jwts.parser()
                 .setSigningKey(publicKey)
-                .requireIssuer(properties.getToken().getIssuer())
+                .requireIssuer(this.properties.getToken().getIssuer())
                 .parseClaimsJws(tokenContent);
         final Claims body = parsedToken.getBody();
         if (!body.containsKey("sub")) {
@@ -118,7 +136,7 @@ public class AccessTokenService {
      */
     public boolean isValid(final String token) {
         try {
-            parseAccessToken(token);
+            this.parseAccessToken(token);
             return true;
         } catch (Exception e) {
             return false;
@@ -129,15 +147,15 @@ public class AccessTokenService {
         final String activeSignKey = this.keyProvider.getActiveSignKey();
         final PrivateKey privateKey = this.keyProvider.receivePrivateKey(activeSignKey);
         final String algorithm = this.keyProvider.getAlg(activeSignKey);
-        final SignatureAlgorithm signatureAlgorithm = io.jsonwebtoken.SignatureAlgorithm.valueOf(algorithm);
+        final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.valueOf(algorithm);
         final String keyId = this.keyProvider.getKid(activeSignKey);
-        final int validity = properties.getToken().getInitialize().getValidity();
+        final int validity = this.properties.getToken().getInitialize().getValidity();
 
         return Jwts.builder()
                 .signWith(signatureAlgorithm, privateKey)
-                .setHeaderParam("typ", properties.getToken().getType())
+                .setHeaderParam("typ", this.properties.getToken().getType())
                 .setHeaderParam("kid", keyId)
-                .setIssuer(properties.getToken().getIssuer())
+                .setIssuer(this.properties.getToken().getIssuer())
                 .setExpiration(new Date(Instant.now().plusSeconds(validity).toEpochMilli()));
     }
 }

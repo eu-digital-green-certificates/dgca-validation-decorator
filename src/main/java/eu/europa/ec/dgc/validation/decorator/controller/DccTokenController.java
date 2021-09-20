@@ -68,8 +68,8 @@ public class DccTokenController {
         @ApiResponse(responseCode = "410", description = "Gone. Repository service reports errors"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     })
-    @PostMapping(value = PATH, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<AccessTokenPayload> token(
+    @PostMapping(value = PATH, consumes = MediaType.APPLICATION_JSON_VALUE, produces = "application/jwt")
+    public ResponseEntity<String> token(
             @RequestHeader("Authorization") final String token,
             @Valid @RequestBody final DccTokenRequest dccToken) {
         log.debug("Incoming POST request to '{}' with content '{}' and token '{}'", PATH, dccToken, token);
@@ -78,12 +78,13 @@ public class DccTokenController {
             final Map<String, String> tokenContent = accessTokenService.parseAccessToken(token);
             if (tokenContent.containsKey("sub") && tokenContent.get("sub") != null) {
                 final String subject = tokenContent.get("sub");
-                final AccessTokenPayload accessTocken = dccTokenService
+                final AccessTokenPayload accessTockenPayload = dccTokenService
                         .getAccessTockenForValidationService(dccToken, subject);
+                final String accessToken = this.accessTokenService.buildAccessToken(accessTockenPayload);
                 
                 final HttpHeaders headers = new HttpHeaders();
-                headers.set("X-Nonce", accessTocken.getNonce());
-                return ResponseEntity.ok().headers(headers).body(accessTocken);
+                headers.set("X-Nonce", accessTockenPayload.getNonce());
+                return ResponseEntity.ok().headers(headers).body(accessToken);
             }
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
