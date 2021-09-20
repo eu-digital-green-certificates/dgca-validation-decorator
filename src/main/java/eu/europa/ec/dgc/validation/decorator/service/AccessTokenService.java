@@ -85,6 +85,12 @@ public class AccessTokenService {
                 .compact();
     }
 
+    /**
+     * Generates access token from from {@link AccessTokenPayload}.
+     * 
+     * @param payload {@link AccessTokenPayload}
+     * @return {@link String} JWT token
+     */
     public String buildAccessToken(final AccessTokenPayload payload) {
         final Map<String, Object> claims = new HashMap<>();
         claims.put("jti", payload.getJti());
