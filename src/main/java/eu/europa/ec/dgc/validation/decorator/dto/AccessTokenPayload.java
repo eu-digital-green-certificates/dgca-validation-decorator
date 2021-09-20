@@ -62,8 +62,9 @@ public class AccessTokenPayload {
     @Data
     public static final class AccessTokenConditions {
 
+        // disabled: used only Token 2
         // Hash of the DCC. Not applicable for Type 1,2.
-        private String hash;
+        // private String hash;
 
         // Selected language.
         private String lang;

@@ -47,8 +47,6 @@ public class DccTokenService {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
 
-    private static final DateTimeFormatter BIRTH_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-
     private final DgcProperties dgcProperties;
 
     private final ValidationServiceRepository validationServiceRepository;
@@ -89,19 +87,18 @@ public class DccTokenService {
             final SubjectResponse subjectResponse,
             final OccurrenceInfoResponse occurrenceInfo) {
         final AccessTokenConditions accessTokenConditions = new AccessTokenConditions();
-        //  TODO add hash
         accessTokenConditions.setLang(occurrenceInfo.getLanguage());
         accessTokenConditions.setFnt(subjectResponse.getForename());
         accessTokenConditions.setGnt(subjectResponse.getLastname());
-        if (subjectResponse.getBirthDate() != null) {
-            accessTokenConditions.setDob(subjectResponse.getBirthDate().format(BIRTH_DATE_FORMATTER));
-        }
         accessTokenConditions.setCoa(occurrenceInfo.getCountryOfArrival());
         accessTokenConditions.setCod(occurrenceInfo.getCountryOfDeparture());
         accessTokenConditions.setRoa(occurrenceInfo.getRegionOfArrival());
         accessTokenConditions.setRod(occurrenceInfo.getRegionOfDeparture());
         accessTokenConditions.setType(occurrenceInfo.getConditionTypes());
         accessTokenConditions.setCategory(occurrenceInfo.getCategories());
+        if (subjectResponse.getBirthDate() != null && !subjectResponse.getBirthDate().isBlank()) {
+            accessTokenConditions.setDob(subjectResponse.getBirthDate());
+        }
 
         final OffsetDateTime departureTime = occurrenceInfo.getDepartureTime();
         accessTokenConditions.setValidFrom(departureTime.format(FORMATTER));
@@ -109,7 +106,7 @@ public class DccTokenService {
         accessTokenConditions.setValidTo(departureTime.plusDays(2).format(FORMATTER));
 
         final AccessTokenPayload accessTokenPayload = new AccessTokenPayload();
-        //  TODO add jti
+        accessTokenPayload.setJti(subjectResponse.getJti());
         accessTokenPayload.setIss(this.dgcProperties.getToken().getIssuer());
         accessTokenPayload.setIat(Instant.now().getEpochSecond());
         accessTokenPayload.setExp(initialize.getExp());

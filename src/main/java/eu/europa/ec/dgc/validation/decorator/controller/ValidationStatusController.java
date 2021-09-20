@@ -42,7 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ValidationStatusController {
 
     private static final String PATH = "/status";
-    
+
     private final ValidationStatusService validationStatusService;
 
     private final AccessTokenService accessTokenService;
@@ -65,7 +65,7 @@ public class ValidationStatusController {
     @GetMapping(value = PATH, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity status(@RequestHeader("Authorization") final String token) {
         log.debug("Incoming GET request to '{}' with token '{}'", PATH, token);
-        
+
         if (accessTokenService.isValid(token)) {
             final Map<String, String> tokenContent = accessTokenService.parseAccessToken(token);
             if (tokenContent.containsKey("sub") && tokenContent.get("sub") != null) {

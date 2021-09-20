@@ -21,7 +21,6 @@
 package eu.europa.ec.dgc.validation.decorator.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,11 +37,11 @@ public class ServiceTokenContentResponse {
     private List<SubjectResponse> passengers = new ArrayList<>();
 
     private OccurrenceInfoResponse flightInfo;
-    
+
     public List<SubjectResponse> getSubjects() {
         return this.getPassengers();
     }
-    
+
     public OccurrenceInfoResponse getOccurrenceInfo() {
         return this.getFlightInfo();
     }
@@ -56,11 +55,13 @@ public class ServiceTokenContentResponse {
 
         private String lastname;
 
-        private LocalDate birthDate;
+        private String birthDate;
 
         private DccStatusResponse dccStatus;
 
         private String serviceIdUsed;
+
+        private String jti;
     }
 
     @Data
