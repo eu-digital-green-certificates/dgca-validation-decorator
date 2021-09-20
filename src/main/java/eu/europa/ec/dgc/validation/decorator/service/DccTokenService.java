@@ -31,14 +31,20 @@ import eu.europa.ec.dgc.validation.decorator.entity.ServiceTokenContentResponse.
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceInitializeResponse;
 import eu.europa.ec.dgc.validation.decorator.exception.NotFoundException;
 import eu.europa.ec.dgc.validation.decorator.exception.NotImplementedException;
+import eu.europa.ec.dgc.validation.decorator.exception.RepositoryException;
 import eu.europa.ec.dgc.validation.decorator.repository.BackendRepository;
 import eu.europa.ec.dgc.validation.decorator.repository.ValidationServiceRepository;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DccTokenService {
@@ -68,17 +74,39 @@ public class DccTokenService {
             throw new NotImplementedException(String.format("Service type '%s' not implemented", service.getType()));
         }
 
-        final ValidationServiceInitializeResponse initialize = validationServiceRepository
-                .initialize(service, dccToken, subject);
+        final String nonce = buildNonce();
+        ValidationServiceInitializeResponse initialize;
+        try {
+            initialize = validationServiceRepository.initialize(service, dccToken, subject, nonce);
+        } catch (HttpClientErrorException e) {
+            log.error(e.getMessage(), e);
+            throw new RepositoryException("Validation service http client error", e);
+        }
 
-        final ServiceTokenContentResponse tokenContent = backendRepository.tokenContent(subject, service);
+        final ServiceTokenContentResponse tokenContent;
+        try {
+            tokenContent = backendRepository.tokenContent(subject, service);
+        } catch (HttpClientErrorException e) {
+            log.error(e.getMessage(), e);
+            throw new RepositoryException("Booking service http client error", e);
+        }
+
         if (tokenContent.getSubjects() == null || tokenContent.getSubjects().isEmpty()) {
             throw new NotFoundException("Passenger not found by subject");
         }
         final SubjectResponse subjectResponse = tokenContent.getSubjects().get(0);
         final OccurrenceInfoResponse occurrenceInfo = tokenContent.getOccurrenceInfo();
 
-        return this.buildAccessToken(subject, initialize, subjectResponse, occurrenceInfo);
+        final AccessTokenPayload accessToken = this.buildAccessToken(subject, initialize, subjectResponse,
+                occurrenceInfo);
+        accessToken.setNonce(nonce);
+        return accessToken;
+    }
+
+    private String buildNonce() {
+        byte[] randomBytes = new byte[16];
+        new SecureRandom().nextBytes(randomBytes);
+        return Base64.getEncoder().encodeToString(randomBytes);
     }
 
     private AccessTokenPayload buildAccessToken(

@@ -28,8 +28,6 @@ import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceInitializeR
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceStatusResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceStatusResponse.Status;
 import eu.europa.ec.dgc.validation.decorator.service.AccessTokenService;
-import java.util.Base64;
-import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
@@ -75,7 +73,10 @@ public class ValidationServiceRepository {
      * @return {@link ValidationServiceInitializeResponse}
      */
     public ValidationServiceInitializeResponse initialize(
-            final ServiceProperties service, DccTokenRequest dccToken, String subject) {
+            final ServiceProperties service, 
+            final DccTokenRequest dccToken, 
+            final String subject, 
+            final String nonce) {
         final String url = UriComponentsBuilder.fromUriString(service.getServiceEndpoint())
                 .pathSegment("initialize", subject)
                 .toUriString();
@@ -83,7 +84,7 @@ public class ValidationServiceRepository {
         final ValidationServiceInitializeRequest body = new ValidationServiceInitializeRequest();
         body.setPubKey(dccToken.getPubKey());
         body.setKeyType("ES256"); // FIXME source?
-        body.setNonce(this.buildNonce());
+        body.setNonce(nonce);
         // TODO add callback
 
         final HttpHeaders headers = new HttpHeaders();
@@ -125,11 +126,5 @@ public class ValidationServiceRepository {
             default:
                 return new ValidationServiceStatusResponse(Status.ERROR, response.getStatusCodeValue());
         }
-    }
-
-    private String buildNonce() {
-        byte[] randomBytes = new byte[16];
-        new Random().nextBytes(randomBytes);
-        return Base64.getEncoder().encodeToString(randomBytes);
     }
 }
