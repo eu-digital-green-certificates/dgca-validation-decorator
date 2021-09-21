@@ -74,14 +74,14 @@ public class DccTokenController {
             @Valid @RequestBody final DccTokenRequest dccToken) {
         log.debug("Incoming POST request to '{}' with content '{}' and token '{}'", PATH, dccToken, token);
 
-        if (accessTokenService.isValid(token)) {
-            final Map<String, String> tokenContent = accessTokenService.parseAccessToken(token);
-            if (tokenContent.containsKey("sub") && tokenContent.get("sub") != null) {
-                final String subject = tokenContent.get("sub");
+        if (this.accessTokenService.isValid(token)) {
+            final Map<String, Object> tokenContent = this.accessTokenService.parseAccessToken(token);
+            if (tokenContent.containsKey("sub") && tokenContent.get("sub") instanceof String) {
+                final String subject = (String) tokenContent.get("sub");
                 final AccessTokenPayload accessTockenPayload = dccTokenService
                         .getAccessTockenForValidationService(dccToken, subject);
                 final String accessToken = this.accessTokenService.buildAccessToken(accessTockenPayload);
-                
+
                 final HttpHeaders headers = new HttpHeaders();
                 headers.set("X-Nonce", accessTockenPayload.getNonce());
                 return ResponseEntity.ok().headers(headers).body(accessToken);

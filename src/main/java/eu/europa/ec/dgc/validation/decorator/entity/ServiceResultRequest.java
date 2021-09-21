@@ -24,9 +24,7 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 
 @Data
 public class ServiceResultRequest {
@@ -42,7 +40,7 @@ public class ServiceResultRequest {
 
         private String issuer;
 
-        private long iat;
+        private Long iat;
 
         private String sub;
 
@@ -56,37 +54,10 @@ public class ServiceResultRequest {
 
         private String identifier;
 
-        private DccStatusResult result;
+        private String result;
 
-        private DccStatusType type;
+        private String type;
 
         private String details;
-    }
-    
-    
-    public static enum DccStatusResult {
-
-        OPEN,
-
-        FAILED,
-
-        PASSED;
-    }
-    
-    @Getter
-    @AllArgsConstructor
-    public static enum DccStatusType {
-
-        TECHNICAL_CHECK("Technical Check"),
-
-        ISSUER_INVALIDATION("Issuer Invalidation"),
-
-        DESTINATION("Destination"),
-
-        ACCEPTANCE_TRAVELER("Acceptance Traveler"),
-
-        ACCEPTANCE("Acceptance");
-
-        private String name;
-    }
+    }    
 }

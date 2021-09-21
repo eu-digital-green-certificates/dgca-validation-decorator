@@ -20,6 +20,7 @@
 
 package eu.europa.ec.dgc.validation.decorator.entity;
 
+import eu.europa.ec.dgc.validation.decorator.dto.ResultToken;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -27,20 +28,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ValidationServiceStatusResponse {
 
-    public Status status;
+    private int httpStatusCode;
 
-    public int httpStatusCode;
+    private String jwt;
+    
+    private ResultToken resultToken;
 
-    public ValidationServiceStatusResponse(Status status, int httpStatusCode) {
-        this.status = status;
-        this.httpStatusCode = httpStatusCode;
+    public ValidationServiceStatusResponse(final int httpStatusCode) {
+        this(httpStatusCode, null);
     }
 
-    public static enum Status {
-        VALID,
-
-        WAITING,
-
-        ERROR;
+    public ValidationServiceStatusResponse(final int httpStatusCode, final String jwt) {
+        this.httpStatusCode = httpStatusCode;
+        this.jwt = jwt;
     }
 }

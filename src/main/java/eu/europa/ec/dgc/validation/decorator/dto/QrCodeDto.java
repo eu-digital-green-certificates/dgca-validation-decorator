@@ -39,6 +39,9 @@ public class QrCodeDto {
     // used from application.yml
     private String serviceIdentity;
 
+    // used from application.yml
+    private String privacyUrl;
+
     // Service Validation Document
     // used from application.yml
     // currently disabled // private String validationIdentity;

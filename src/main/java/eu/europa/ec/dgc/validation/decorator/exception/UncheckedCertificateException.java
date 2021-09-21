@@ -18,35 +18,13 @@
  * ---license-end
  */
 
-package eu.europa.ec.dgc.validation.decorator.dto;
+package eu.europa.ec.dgc.validation.decorator.exception;
 
-import java.util.List;
-import lombok.Data;
+import java.security.cert.CertificateException;
 
-@Data
-public class CallbackRequest {
+public class UncheckedCertificateException extends RuntimeException {
 
-    private String issuer;
-    
-    private Long iat;
-    
-    private String sub;
-    
-    private String result;
-    
-    private String confirmation;
-    
-    private List<Result> results;
-    
-    @Data
-    public static final class Result {
-        
-        private String identifier;
-        
-        private String result;
-        
-        private String type;
-        
-        private String details;
+    public UncheckedCertificateException(CertificateException e) {
+        super(e);
     }
 }

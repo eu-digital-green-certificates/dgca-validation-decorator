@@ -1,3 +1,6 @@
+###############################################################################
+#### Properties for local development along with CF environment
+###############################################################################
 identity:
   protocol: DCCVALIDATION
   protocolVersion: 1.0.0
@@ -12,8 +15,8 @@ identity:
 
 booking:
   urls:
-    tokenContent: http://localhost:8082/tokencontent/{subject}
-    result: http://localhost:8082/result/{subject}
+    tokenContent: https://dgca-booking-demo-backend-eu-test.cfapps.eu10.hana.ondemand.com/tokencontent/{subject}
+    result: https://dgca-booking-demo-backend-eu-test.cfapps.eu10.hana.ondemand.com/result/{subject}
 
 #### Create Key: keytool -genkey -alias [ALIAS NAME] -keyalg EC -validity 3650 -keystore dev-decorator.jks -storetype JKS
 dgc:
@@ -43,7 +46,7 @@ dgc:
   services:
     - id: ${dgc.serviceUrl}/identity/service/ValidationService#ValidationService-1
       type: ValidationService
-      serviceEndpoint: http://localhost:8081
+      serviceEndpoint: https://dgca-validation-service-eu-test.cfapps.eu10.hana.ondemand.com
       name: Validation Service
   #### Validation Decorator
   endpoints:

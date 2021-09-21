@@ -20,33 +20,35 @@
 
 package eu.europa.ec.dgc.validation.decorator.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 
 @Data
-public class CallbackRequest {
+public class ResultToken {
 
-    private String issuer;
-    
-    private Long iat;
-    
-    private String sub;
-    
     private String result;
-    
+
+    private List<Result> results = new ArrayList<>();
+
     private String confirmation;
-    
-    private List<Result> results;
-    
+
+    @JsonIgnore
+    private String issuer;
+
+    @JsonIgnore
+    private Long iat;
+
     @Data
     public static final class Result {
-        
+
         private String identifier;
-        
+
         private String result;
-        
+
         private String type;
-        
+
         private String details;
     }
 }

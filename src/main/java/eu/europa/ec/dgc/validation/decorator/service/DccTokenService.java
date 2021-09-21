@@ -77,7 +77,7 @@ public class DccTokenService {
         final String nonce = buildNonce();
         ValidationServiceInitializeResponse initialize;
         try {
-            initialize = validationServiceRepository.initialize(service, dccToken, subject, nonce);
+            initialize = this.validationServiceRepository.initialize(service, dccToken, subject, nonce);
         } catch (HttpClientErrorException e) {
             log.error(e.getMessage(), e);
             throw new RepositoryException("Validation service http client error", e);
@@ -85,14 +85,14 @@ public class DccTokenService {
 
         final ServiceTokenContentResponse tokenContent;
         try {
-            tokenContent = backendRepository.tokenContent(subject, service);
+            tokenContent = this.backendRepository.tokenContent(subject, service);
         } catch (HttpClientErrorException e) {
             log.error(e.getMessage(), e);
-            throw new RepositoryException("Booking service http client error", e);
+            throw new RepositoryException("Backend service http client error", e);
         }
 
         if (tokenContent.getSubjects() == null || tokenContent.getSubjects().isEmpty()) {
-            throw new NotFoundException("Passenger not found by subject");
+            throw new NotFoundException("Subject not found in token");
         }
         final SubjectResponse subjectResponse = tokenContent.getSubjects().get(0);
         final OccurrenceInfoResponse occurrenceInfo = tokenContent.getOccurrenceInfo();

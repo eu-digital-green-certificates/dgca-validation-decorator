@@ -20,41 +20,41 @@
 
 package eu.europa.ec.dgc.validation.decorator.converter;
 
-import eu.europa.ec.dgc.validation.decorator.dto.CallbackRequest;
-import eu.europa.ec.dgc.validation.decorator.dto.CallbackRequest.Result;
+import eu.europa.ec.dgc.validation.decorator.dto.ResultToken;
+import eu.europa.ec.dgc.validation.decorator.dto.ResultToken.Result;
 import eu.europa.ec.dgc.validation.decorator.entity.ServiceResultRequest;
 import eu.europa.ec.dgc.validation.decorator.entity.ServiceResultRequest.DccStatusRequest;
 import eu.europa.ec.dgc.validation.decorator.entity.ServiceResultRequest.ResultRequest;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CallbackRequestToServiceResultRequestConverter
-        implements Converter<CallbackRequest, ServiceResultRequest> {
+public class ResultTokenToServiceResultRequestConverter implements Converter<ResultToken, ServiceResultRequest> {
 
     @Override
-    public ServiceResultRequest convert(CallbackRequest callback) {
-        final ServiceResultRequest result = new ServiceResultRequest();
-        result.setDccStatus(new DccStatusRequest());
-        result.getDccStatus().setIssuer(callback.getIssuer());
-        result.getDccStatus().setIat(callback.getIat());
-        result.getDccStatus().setSub(callback.getSub());
+    public ServiceResultRequest convert(ResultToken source) {
+        final ServiceResultRequest request = new ServiceResultRequest();
+        request.setDccStatus(new DccStatusRequest());
+        request.getDccStatus().setIssuer(source.getIssuer());
+        request.getDccStatus().setIat(source.getIat());
 
-        if (callback.getResults() != null) {
-            result.getDccStatus().setResults(callback.getResults().stream()
+        if (source.getResults() != null) {
+            final List<ResultRequest> resultsRequest = source.getResults().stream()
                     .map(this::convert)
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList());
+            request.getDccStatus().setResults(resultsRequest);
         }
-        return result;
+        return request;
     }
 
-    private ResultRequest convert(Result callbackResult) {
+    private ResultRequest convert(Result result) {
         final ResultRequest resultRequest = new ResultRequest();
-        resultRequest.setIdentifier(callbackResult.getIdentifier());
-        resultRequest.setResult(callbackResult.getResult());
-        resultRequest.setDetails(callbackResult.getDetails());
-        resultRequest.setType(callbackResult.getType());
+        resultRequest.setIdentifier(result.getIdentifier());
+        resultRequest.setResult(result.getResult());
+        resultRequest.setType(result.getType());
+        resultRequest.setDetails(result.getDetails());
         return resultRequest;
     }
 }

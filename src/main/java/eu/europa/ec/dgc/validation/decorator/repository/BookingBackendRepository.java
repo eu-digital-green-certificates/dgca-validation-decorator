@@ -76,7 +76,7 @@ public class BookingBackendRepository implements BackendRepository {
     public ServiceTokenContentResponse tokenContent(final String subject, final ServiceProperties service) {
         final UriComponentsBuilder urlBuilder = UriComponentsBuilder
                 .fromUriString(this.tokenContentUrl.replace(PLACEHOLDER_SUBJECT, subject));
-        
+
         String serviceIdBase64 = null;
         if (service != null && service.getId() != null) {
             log.debug("Receive service ID to booking service '{}'", service.getId());
@@ -106,7 +106,12 @@ public class BookingBackendRepository implements BackendRepository {
      */
     @Override
     public void result(final String subject, final ServiceResultRequest body) {
-        final String url = this.resultUrl.replace(PLACEHOLDER_SUBJECT, subject);
+        if (body.getDccStatus() != null) {
+            body.getDccStatus().setSub(subject);
+        }
+
+        final String url = "http://localhost:8082/result/{subject}".replace(PLACEHOLDER_SUBJECT, subject);
+        //final String url = this.resultUrl.replace(PLACEHOLDER_SUBJECT, subject);
 
         final HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", accessTokenService.buildHeaderToken(subject));

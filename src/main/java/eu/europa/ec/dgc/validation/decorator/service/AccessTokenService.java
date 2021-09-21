@@ -25,9 +25,12 @@ import eu.europa.ec.dgc.validation.decorator.dto.AccessTokenPayload;
 import eu.europa.ec.dgc.validation.decorator.exception.DccException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.impl.DefaultJwtParser;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.time.Instant;
@@ -37,6 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -113,25 +117,62 @@ public class AccessTokenService {
      * @param token with or without prefix
      * @return {@link Map} with {@link String} as key and {@link String} as value
      */
-    public Map<String, String> parseAccessToken(final String token) {
-        final String tokenContent = token.startsWith(TOKEN_PREFIX) ? token.replace(TOKEN_PREFIX, "") : token;
+    public Map<String, Object> parseAccessToken(final String token) {
         final String activeSignKey = this.keyProvider.getActiveSignKey();
         final PublicKey publicKey = this.keyProvider.receiveCertificate(activeSignKey).getPublicKey();
+        final String issuer = this.properties.getToken().getIssuer();
 
-        final Jws<Claims> parsedToken = Jwts.parser()
-                .setSigningKey(publicKey)
-                .requireIssuer(this.properties.getToken().getIssuer())
-                .parseClaimsJws(tokenContent);
-        final Claims body = parsedToken.getBody();
+        final Map<String, Object> body = this.parseAccessToken(token, publicKey, issuer);
         if (!body.containsKey("sub")) {
             throw new DccException("Token invalid: subjet not found");
         }
 
-        final String subject = body.get("sub", String.class);
-        if (subject == null || subject.isBlank()) {
+        final Object subject = body.get("sub");
+        if (!(subject instanceof String && !((String) subject).isBlank())) {
             throw new DccException("Token invalid: subjet is blank");
         }
-        return Collections.singletonMap("sub", subject);
+        return body;
+    }
+
+    /**
+     * Read content from token, if token is valid.
+     * 
+     * @param token with or without prefix
+     * @return {@link Map} with {@link String} as key and {@link String} as value
+     */
+    public Map<String, Object> parseAccessToken(final String token, final PublicKey publicKey) {
+        return this.parseAccessToken(token, publicKey, null);
+    }
+
+    /**
+     * Read content from token, if token is valid.
+     * 
+     * @param token with or without prefix
+     * @return {@link Map} with {@link String} as key and {@link String} as value
+     */
+    public Map<String, Object> parseAccessToken(final String token, final PublicKey publicKey, final String issuer) {
+        final String tokenContent = token.startsWith(TOKEN_PREFIX) ? token.replace(TOKEN_PREFIX, "") : token;
+
+        final JwtParser parser = Jwts.parser().setSigningKey(publicKey);
+        if (StringUtils.hasText(issuer)) {
+            parser.requireIssuer(this.properties.getToken().getIssuer());
+        }
+
+        final Jws<Claims> parsedToken = parser.parseClaimsJws(tokenContent);
+        return new HashMap<>(parsedToken.getBody());
+    }
+
+    /**
+     * Parses the token without any security checks.
+     * 
+     * @param token JWT
+     * @return parsed JWT
+     */
+    public Jwt parseUnsecure(final String token) {
+        final String[] splitToken = token.split("\\.");
+        final String unsignedToken = splitToken[0] + "." + splitToken[1] + ".";
+        final DefaultJwtParser parser = new DefaultJwtParser();
+        return parser.parse(unsignedToken);
     }
 
     /**

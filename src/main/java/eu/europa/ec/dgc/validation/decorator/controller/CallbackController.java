@@ -72,9 +72,9 @@ public class CallbackController {
             @Valid @RequestBody final CallbackRequest request) {
         log.debug("Incoming PUT request to '{}' with subject '{}'", PATH, subject);
         
-        if (accessTokenService.isValid(token)) {
-            final Map<String, String> tokenContent = accessTokenService.parseAccessToken(token);
-            if (tokenContent.containsKey("sub") && tokenContent.get("sub") != null) {
+        if (this.accessTokenService.isValid(token)) {
+            final Map<String, Object> tokenContent = this.accessTokenService.parseAccessToken(token);
+            if (tokenContent.containsKey("sub") && tokenContent.get("sub") instanceof String) {
                 
                 this.backendService.saveResult(subject, request);
                 return ResponseEntity.ok().build();
