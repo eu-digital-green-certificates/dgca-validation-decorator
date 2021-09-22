@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,8 +59,12 @@ public class RejectController {
         log.debug("Incoming GET request to '{}' with token '{}'", PATH, token);
 
         if (accessTokenService.isValid(token)) {
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok()
+                    .cacheControl(CacheControl.noCache())
+                    .build();
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .cacheControl(CacheControl.noCache())
+                .build();
     }
 }
