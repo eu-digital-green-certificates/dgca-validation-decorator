@@ -75,30 +75,18 @@ public class DccTokenService {
         }
 
         final String nonce = buildNonce();
-        ValidationServiceInitializeResponse initialize;
-        try {
-            initialize = this.validationServiceRepository.initialize(service, dccToken, subject, nonce);
-        } catch (HttpClientErrorException e) {
-            log.error(e.getMessage(), e);
-            throw new RepositoryException("Validation service http client error", e);
-        }
+        final ValidationServiceInitializeResponse initialize = this.getValidationServiceInitialize(
+                dccToken, subject, service, nonce);
 
-        final ServiceTokenContentResponse tokenContent;
-        try {
-            tokenContent = this.backendRepository.tokenContent(subject, service);
-        } catch (HttpClientErrorException e) {
-            log.error(e.getMessage(), e);
-            throw new RepositoryException("Backend service http client error", e);
-        }
-
+        final ServiceTokenContentResponse tokenContent = this.getBackendServiceTokenContent(subject, service);
         if (tokenContent.getSubjects() == null || tokenContent.getSubjects().isEmpty()) {
             throw new NotFoundException("Subject not found in token");
         }
         final SubjectResponse subjectResponse = tokenContent.getSubjects().get(0);
         final OccurrenceInfoResponse occurrenceInfo = tokenContent.getOccurrenceInfo();
 
-        final AccessTokenPayload accessToken = this.buildAccessToken(subject, initialize, subjectResponse,
-                occurrenceInfo);
+        final AccessTokenPayload accessToken = this.buildAccessToken(
+                subject, initialize, subjectResponse, occurrenceInfo);
         accessToken.setNonce(nonce);
         return accessToken;
     }
@@ -144,5 +132,25 @@ public class DccTokenService {
         accessTokenPayload.setConditions(accessTokenConditions);
         accessTokenPayload.setVersion("1.0");
         return accessTokenPayload;
+    }
+
+    private ValidationServiceInitializeResponse getValidationServiceInitialize(final DccTokenRequest dccToken,
+            final String subject, final ServiceProperties service, final String nonce) {
+        try {
+            return this.validationServiceRepository.initialize(service, dccToken, subject, nonce);
+        } catch (HttpClientErrorException e) {
+            log.error(e.getMessage(), e);
+            throw new RepositoryException("Validation service http client error", e);
+        }
+    }
+
+    private ServiceTokenContentResponse getBackendServiceTokenContent(final String subject,
+            final ServiceProperties service) {
+        try {
+            return this.backendRepository.tokenContent(subject, service);
+        } catch (HttpClientErrorException e) {
+            log.error(e.getMessage(), e);
+            throw new RepositoryException("Backend service http client error", e);
+        }
     }
 }
