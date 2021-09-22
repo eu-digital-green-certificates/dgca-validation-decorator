@@ -37,11 +37,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class IdentityController {
 
-    public static final String PATH_ALL = "/identity";
+    static final String PATH_ALL = "/identity";
     
-    private static final String PATH_ELEMENT = "/identity/{element}";
+    static final String PATH_ELEMENT = "/identity/{element}";
     
-    private static final String PATH_ELEMENT_TYPE = "/identity/{element}/{type}";
+    static final String PATH_ELEMENT_TYPE = "/identity/{element}/{type}";
 
     private final IdentityService identityService;
 

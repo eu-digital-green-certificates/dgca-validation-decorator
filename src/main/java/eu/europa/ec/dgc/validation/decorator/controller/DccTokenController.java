@@ -45,7 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class DccTokenController {
 
-    private static final String PATH = "/token";
+    static final String PATH = "/token";
 
     private final AccessTokenService accessTokenService;
 

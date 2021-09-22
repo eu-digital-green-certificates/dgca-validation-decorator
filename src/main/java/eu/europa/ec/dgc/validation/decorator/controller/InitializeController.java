@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class InitializeController {
 
-    private static final String PATH = "/initialize/{subject}";
+    static final String PATH = "/initialize/{subject}";
     
     private final InitializeService initializeService;
 
