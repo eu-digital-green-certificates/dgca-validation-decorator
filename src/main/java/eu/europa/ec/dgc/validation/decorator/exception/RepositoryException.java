@@ -18,35 +18,16 @@
  * ---license-end
  */
 
-package eu.europa.ec.dgc.validation.decorator.dto;
+package eu.europa.ec.dgc.validation.decorator.exception;
 
-import java.util.List;
-import lombok.Data;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.client.HttpClientErrorException;
 
-@Data
-public class CallbackRequest {
+@ResponseStatus(value = HttpStatus.GONE)
+public class RepositoryException extends RuntimeException {
 
-    private String issuer;
-    
-    private Long iat;
-    
-    private String sub;
-    
-    private String result;
-    
-    private String confirmation;
-    
-    private List<Result> results;
-    
-    @Data
-    public static final class Result {
-        
-        private String identifier;
-        
-        private String result;
-        
-        private String type;
-        
-        private String details;
+    public RepositoryException(final String message, final HttpClientErrorException e) {
+        super(message, e);
     }
 }

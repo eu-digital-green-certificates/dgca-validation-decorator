@@ -3,6 +3,7 @@ identity:
   protocolVersion: 1.0.0
   #### serviceIdentity
   serviceIdentityUrl: https://validation-decorator.example
+  privacyUrl: https://validation-decorator.example
   consent: I want to check your DCC to confirm your booking! :)
   serviceProvider: Service Provider.com
   restTemplate:
@@ -33,7 +34,7 @@ dgc:
     - StatusServiceKey-1
     - ValidationServiceKey-1
   token:
-    issuer: Validation Decorator Dervice
+    issuer: Validation Decorator Service
     type: JWT
     initialize:
       #### in seconds. Expiration is calculated
@@ -69,8 +70,6 @@ server:
 spring:
   application:
     name: dgca-validation-decorator
-  profiles:
-    active: keys
 
 management:
   endpoint:

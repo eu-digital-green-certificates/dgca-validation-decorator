@@ -20,6 +20,7 @@
 
 package eu.europa.ec.dgc.validation.decorator.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import lombok.Data;
@@ -39,7 +40,6 @@ public class AccessTokenPayload {
 
     private long exp;
 
-    // TODO change to enum?
     // 0 = Structure / Validates just the Content of the DCC (Schema, Values, CBOR Structure)
     // 1 = Cryptographic / Structure Validation + Signature Validation
     // 2 = Full / Structure Validation + Cryptographic + Business Rule Check (condition structure necessary necessary)
@@ -53,17 +53,15 @@ public class AccessTokenPayload {
     @JsonProperty("vc")
     private AccessTokenConditions conditions;
 
-    //    public static enum Type {
-    //        STRUCTURE,
-    //        CRYPTOGRAPHIC,
-    //        FULL;
-    //    }
+    @JsonIgnore
+    private String nonce;
 
     @Data
     public static final class AccessTokenConditions {
 
+        // disabled: used only Token 2
         // Hash of the DCC. Not applicable for Type 1,2.
-        private String hash;
+        // private String hash;
 
         // Selected language.
         private String lang;

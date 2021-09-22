@@ -31,6 +31,7 @@ import java.util.Map;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -64,21 +65,26 @@ public class DccTokenController {
         @ApiResponse(responseCode = "400", description = "Bad Request / Validation errors"),
         @ApiResponse(responseCode = "401", description = "Unauthorized, if no access token was provided"),
         @ApiResponse(responseCode = "404", description = "Not Found"),
+        @ApiResponse(responseCode = "410", description = "Gone. Repository service reports errors"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     })
-    @PostMapping(value = PATH, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<AccessTokenPayload> token(
+    @PostMapping(value = PATH, consumes = MediaType.APPLICATION_JSON_VALUE, produces = "application/jwt")
+    public ResponseEntity<String> token(
             @RequestHeader("Authorization") final String token,
             @Valid @RequestBody final DccTokenRequest dccToken) {
         log.debug("Incoming POST request to '{}' with content '{}' and token '{}'", PATH, dccToken, token);
 
-        if (accessTokenService.isValid(token)) {
-            final Map<String, String> tokenContent = accessTokenService.parseAccessToken(token);
-            if (tokenContent.containsKey("sub") && tokenContent.get("sub") != null) {
-                final String subject = tokenContent.get("sub");
-                final AccessTokenPayload accessTocken = dccTokenService
+        if (this.accessTokenService.isValid(token)) {
+            final Map<String, Object> tokenContent = this.accessTokenService.parseAccessToken(token);
+            if (tokenContent.containsKey("sub") && tokenContent.get("sub") instanceof String) {
+                final String subject = (String) tokenContent.get("sub");
+                final AccessTokenPayload accessTockenPayload = dccTokenService
                         .getAccessTockenForValidationService(dccToken, subject);
-                return ResponseEntity.ok(accessTocken);
+                final String accessToken = this.accessTokenService.buildAccessToken(accessTockenPayload);
+
+                final HttpHeaders headers = new HttpHeaders();
+                headers.set("X-Nonce", accessTockenPayload.getNonce());
+                return ResponseEntity.ok().headers(headers).body(accessToken);
             }
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

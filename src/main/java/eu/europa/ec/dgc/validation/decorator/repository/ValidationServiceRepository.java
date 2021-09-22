@@ -26,16 +26,16 @@ import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceIdentityRes
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceInitializeRequest;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceInitializeResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceStatusResponse;
-import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceStatusResponse.Status;
 import eu.europa.ec.dgc.validation.decorator.service.AccessTokenService;
-import java.util.Base64;
-import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -55,6 +55,7 @@ public class ValidationServiceRepository {
      * 
      * @return {@link ValidationServiceIdentityResponse}
      */
+    @Cacheable("vsidentity")
     public ValidationServiceIdentityResponse identity(final ServiceProperties service) {
         final String url = UriComponentsBuilder.fromUriString(service.getServiceEndpoint())
                 .path("identity")
@@ -67,6 +68,15 @@ public class ValidationServiceRepository {
     }
 
     /**
+     * Clear 'vsidentity' cache. 600.000 = 10m.
+     */
+    @Scheduled(fixedDelay = 600000, initialDelay = 10000)
+    @CacheEvict(value = "vsidentity", allEntries = true)
+    public void clearVsIdentityCache() {
+        log.debug("Clear 'vsidentity' cache");
+    }
+
+    /**
      * Validation service initialize endpoint.
      * 
      * @param service {@link ServiceProperties}
@@ -75,7 +85,10 @@ public class ValidationServiceRepository {
      * @return {@link ValidationServiceInitializeResponse}
      */
     public ValidationServiceInitializeResponse initialize(
-            final ServiceProperties service, DccTokenRequest dccToken, String subject) {
+            final ServiceProperties service,
+            final DccTokenRequest dccToken,
+            final String subject,
+            final String nonce) {
         final String url = UriComponentsBuilder.fromUriString(service.getServiceEndpoint())
                 .pathSegment("initialize", subject)
                 .toUriString();
@@ -83,7 +96,7 @@ public class ValidationServiceRepository {
         final ValidationServiceInitializeRequest body = new ValidationServiceInitializeRequest();
         body.setPubKey(dccToken.getPubKey());
         body.setKeyType("ES256"); // FIXME source?
-        body.setNonce(this.buildNonce());
+        body.setNonce(nonce);
         // TODO add callback
 
         final HttpHeaders headers = new HttpHeaders();
@@ -119,17 +132,11 @@ public class ValidationServiceRepository {
         final ResponseEntity<String> response = restTpl.exchange(url, HttpMethod.GET, entity, String.class);
         switch (response.getStatusCode()) {
             case OK:
-                return new ValidationServiceStatusResponse(Status.VALID, response.getStatusCodeValue());
+                return new ValidationServiceStatusResponse(response.getStatusCodeValue(), response.getBody());
             case NO_CONTENT:
-                return new ValidationServiceStatusResponse(Status.WAITING, response.getStatusCodeValue());
+                return new ValidationServiceStatusResponse(response.getStatusCodeValue());
             default:
-                return new ValidationServiceStatusResponse(Status.ERROR, response.getStatusCodeValue());
+                return new ValidationServiceStatusResponse(response.getStatusCodeValue());
         }
-    }
-
-    private String buildNonce() {
-        byte[] randomBytes = new byte[16];
-        new Random().nextBytes(randomBytes);
-        return Base64.getEncoder().encodeToString(randomBytes);
     }
 }

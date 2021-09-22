@@ -20,6 +20,7 @@
 
 package eu.europa.ec.dgc.validation.decorator.controller;
 
+import eu.europa.ec.dgc.validation.decorator.dto.ResultToken;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceStatusResponse;
 import eu.europa.ec.dgc.validation.decorator.service.AccessTokenService;
 import eu.europa.ec.dgc.validation.decorator.service.ValidationStatusService;
@@ -42,7 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ValidationStatusController {
 
     private static final String PATH = "/status";
-    
+
     private final ValidationStatusService validationStatusService;
 
     private final AccessTokenService accessTokenService;
@@ -63,14 +64,17 @@ public class ValidationStatusController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     @GetMapping(value = PATH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity status(@RequestHeader("Authorization") final String token) {
+    public ResponseEntity<ResultToken> status(@RequestHeader("Authorization") final String token) {
         log.debug("Incoming GET request to '{}' with token '{}'", PATH, token);
-        
-        if (accessTokenService.isValid(token)) {
-            final Map<String, String> tokenContent = accessTokenService.parseAccessToken(token);
-            if (tokenContent.containsKey("sub") && tokenContent.get("sub") != null) {
-                final String subject = tokenContent.get("sub");
-                final ValidationServiceStatusResponse status = validationStatusService.determineStatus(subject);
+
+        if (this.accessTokenService.isValid(token)) {
+            final Map<String, Object> tokenContent = this.accessTokenService.parseAccessToken(token);
+            if (tokenContent.containsKey("sub") && tokenContent.get("sub") instanceof String) {
+                final String subject = (String) tokenContent.get("sub");
+                final ValidationServiceStatusResponse status = this.validationStatusService.determineStatus(subject);
+                if (status.getResultToken() != null) {
+                    return ResponseEntity.status(status.getHttpStatusCode()).body(status.getResultToken());
+                }
                 return ResponseEntity.status(status.getHttpStatusCode()).build();
             }
         }

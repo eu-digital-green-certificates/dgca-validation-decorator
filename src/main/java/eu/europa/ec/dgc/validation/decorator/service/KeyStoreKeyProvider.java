@@ -93,9 +93,9 @@ public class KeyStoreKeyProvider implements KeyProvider {
         }
 
         final KeyStore keyStore = KeyStore.getInstance("JKS");
-        final char[] keyStorePassword = dgcConfigProperties.getKeyStorePassword().toCharArray();
-        try (InputStream is = new FileInputStream(dgcConfigProperties.getKeyStoreFile())) {
-            final char[] privateKeyPassword = dgcConfigProperties.getPrivateKeyPassword().toCharArray();
+        final char[] keyStorePassword = this.dgcConfigProperties.getKeyStorePassword().toCharArray();
+        try (InputStream is = new FileInputStream(this.dgcConfigProperties.getKeyStoreFile())) {
+            final char[] privateKeyPassword = this.dgcConfigProperties.getPrivateKeyPassword().toCharArray();
             keyStore.load(is, privateKeyPassword);
             final KeyStore.PasswordProtection keyPassword = new KeyStore.PasswordProtection(keyStorePassword);
 
@@ -104,9 +104,9 @@ public class KeyStoreKeyProvider implements KeyProvider {
                     final PrivateKeyEntry privateKeyEntry = (PrivateKeyEntry) keyStore.getEntry(alias, keyPassword);
                     if (privateKeyEntry != null) {
                         final PrivateKey privateKey = privateKeyEntry.getPrivateKey();
-                        privateKeys.put(alias, privateKey);
+                        this.privateKeys.put(alias, privateKey);
                     }
-                } 
+                }
                 final X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
                 this.handleCertificate(alias, cert);
             }
@@ -132,32 +132,32 @@ public class KeyStoreKeyProvider implements KeyProvider {
     }
 
     @Override
-    public Certificate receiveCertificate(String keyName) {
-        return certificates.get(keyName);
+    public Certificate receiveCertificate(final String keyName) {
+        return this.certificates.get(keyName);
     }
 
     @Override
-    public PrivateKey receivePrivateKey(String keyName) {
-        return privateKeys.get(keyName);
+    public PrivateKey receivePrivateKey(final String keyName) {
+        return this.privateKeys.get(keyName);
     }
 
     @Override
-    public List<String> getKeyNames(KeyType type) {
+    public List<String> getKeyNames(final KeyType type) {
         final List<String> keyNames = new ArrayList<>();
         switch (type) {
             case VALIDATION_DECORATOR_ENC_KEY:
-                keyNames.addAll(dgcConfigProperties.getEncAliases());
+                keyNames.addAll(this.dgcConfigProperties.getEncAliases());
                 break;
             case VALIDATION_DECORATOR_SIGN_KEY:
-                keyNames.addAll(dgcConfigProperties.getSignAliases());
+                keyNames.addAll(this.dgcConfigProperties.getSignAliases());
                 break;
             case VALIDATION_DECORATOR_KEY:
-                keyNames.addAll(dgcConfigProperties.getKeyAliases());
+                keyNames.addAll(this.dgcConfigProperties.getKeyAliases());
                 break;
             case ALL:
-                keyNames.addAll(dgcConfigProperties.getEncAliases());
-                keyNames.addAll(dgcConfigProperties.getSignAliases());
-                keyNames.addAll(dgcConfigProperties.getKeyAliases());
+                keyNames.addAll(this.dgcConfigProperties.getEncAliases());
+                keyNames.addAll(this.dgcConfigProperties.getSignAliases());
+                keyNames.addAll(this.dgcConfigProperties.getKeyAliases());
                 break;
             default:
                 throw new NotImplementedException(String.format("Key type '%s'", type));
@@ -166,27 +166,27 @@ public class KeyStoreKeyProvider implements KeyProvider {
     }
 
     @Override
-    public String getKid(String keyName) {
-        return kids.get(keyName);
+    public String getKid(final String keyName) {
+        return this.kids.get(keyName);
     }
 
     @Override
-    public String getAlg(String keyName) {
-        return algs.get(keyName);
+    public String getAlg(final String keyName) {
+        return this.algs.get(keyName);
     }
 
     @Override
     public String getActiveSignKey() {
-        return dgcConfigProperties.getActiveSignKey();
+        return this.dgcConfigProperties.getActiveSignKey();
     }
 
     @Override
-    public String getKeyName(String kid) {
-        return kidToName.get(kid);
+    public String getKeyName(final String kid) {
+        return this.kidToName.get(kid);
     }
 
     @Override
-    public KeyUse getKeyUse(String keyName) {
-        return dgcConfigProperties.getEncAliases().contains(keyName) ? KeyUse.ENC : KeyUse.SIG;
+    public KeyUse getKeyUse(final String keyName) {
+        return this.dgcConfigProperties.getEncAliases().contains(keyName) ? KeyUse.ENC : KeyUse.SIG;
     }
 }

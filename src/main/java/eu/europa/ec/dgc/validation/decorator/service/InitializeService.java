@@ -41,13 +41,14 @@ public class InitializeService {
      */
     public QrCodeDto getBySubject(String subject) {
         return QrCodeDto.builder()
-                .protocol(properties.getProtocol())
-                .protocolVersion(properties.getProtocolVersion())
-                .serviceIdentity(properties.getServiceIdentityUrl())
-                .token(accessTokenService.buildAccessToken(subject))
-                .consent(properties.getConsent())
+                .protocol(this.properties.getProtocol())
+                .protocolVersion(this.properties.getProtocolVersion())
+                .serviceIdentity(this.properties.getServiceIdentityUrl())
+                .privacyUrl(this.properties.getPrivacyUrl())
+                .token(this.accessTokenService.buildAccessToken(subject))
+                .consent(this.properties.getConsent())
                 .subject(subject)
-                .serviceProvider(properties.getServiceProvider())
+                .serviceProvider(this.properties.getServiceProvider())
                 .build();
     }
 }
