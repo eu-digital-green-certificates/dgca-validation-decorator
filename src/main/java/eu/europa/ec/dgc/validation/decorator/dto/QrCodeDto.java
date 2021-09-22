@@ -22,9 +22,11 @@ package eu.europa.ec.dgc.validation.decorator.dto;
 
 import lombok.Builder;
 import lombok.Value;
+import lombok.extern.jackson.Jacksonized;
 
 @Value
 @Builder
+@Jacksonized
 public class QrCodeDto {
 
     // Type of the requested protocol

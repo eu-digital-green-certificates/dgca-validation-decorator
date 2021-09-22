@@ -49,12 +49,12 @@ public class IdentityController {
 
     /**
      * Delivers a JSON description of public keys and endpoints.
-     * 
+     *
      * @param element Name of element (optional)
      * @param type Type of element (optional)
      * @return {@link IdentityResponse}
      */
-    @Operation(summary = "The identity document endpoint delivers a JSON description of public keys and endpoints", 
+    @Operation(summary = "The identity document endpoint delivers a JSON description of public keys and endpoints",
             description = "The identity document endpoint delivers a JSON description of public keys and endpoints")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "OK"),

@@ -39,17 +39,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class InitializeController {
 
-    private static final String PATH = "/initialize/{subject}";
+    static final String PATH = "/initialize/{subject}";
 
     private final InitializeService initializeService;
 
     /**
      * Delivers data for a QR in JSON format.
-     * 
+     *
      * @param subject Subject
      * @return {@link QrCodeDto} content for QR code
      */
-    @Operation(summary = "The provision endpoint is the public endpoint for receiving the initialization QR Code", 
+    @Operation(summary = "The provision endpoint is the public endpoint for receiving the initialization QR Code",
             description = "The provision endpoint is the public endpoint for receiving the initialization QR Code")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "OK"),
