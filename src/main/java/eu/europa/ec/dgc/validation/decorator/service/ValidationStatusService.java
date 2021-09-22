@@ -88,7 +88,8 @@ public class ValidationStatusService {
         final String serviceId = subjectResponse.getServiceIdUsed();
         log.debug("Receive service ID (encoded) from booking service '{}'", serviceId);
         if (serviceId == null || serviceId.isBlank()) {
-            throw new DccException(String.format("Subject without service ID '%s'", serviceId), HttpStatus.NO_CONTENT.value());
+            throw new DccException(String.format("Subject without service ID '%s'", serviceId),
+                    HttpStatus.NO_CONTENT.value());
         }
 
         final String decodedServiceId = new String(Base64.getUrlDecoder().decode(serviceId), StandardCharsets.UTF_8);
