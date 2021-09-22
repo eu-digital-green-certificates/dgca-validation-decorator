@@ -110,8 +110,7 @@ public class BookingBackendRepository implements BackendRepository {
             body.getDccStatus().setSub(subject);
         }
 
-        final String url = "http://localhost:8082/result/{subject}".replace(PLACEHOLDER_SUBJECT, subject);
-        //final String url = this.resultUrl.replace(PLACEHOLDER_SUBJECT, subject);
+        final String url = this.resultUrl.replace(PLACEHOLDER_SUBJECT, subject);
 
         final HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", accessTokenService.buildHeaderToken(subject));

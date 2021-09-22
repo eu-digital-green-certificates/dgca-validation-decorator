@@ -3,7 +3,7 @@ identity:
   protocolVersion: 1.0.0
   #### serviceIdentity
   serviceIdentityUrl: https://validation-decorator.example
-  privacyUrl: https://privacyUrl.example.com
+  privacyUrl: https://validation-decorator.example
   consent: I want to check your DCC to confirm your booking! :)
   serviceProvider: Service Provider.com
   restTemplate:
