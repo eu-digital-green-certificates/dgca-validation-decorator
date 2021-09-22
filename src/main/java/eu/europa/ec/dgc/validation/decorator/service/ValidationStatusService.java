@@ -30,6 +30,7 @@ import eu.europa.ec.dgc.validation.decorator.entity.ServiceTokenContentResponse.
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceIdentityResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceIdentityResponse.PublicKeyJwk;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceStatusResponse;
+import eu.europa.ec.dgc.validation.decorator.exception.DccException;
 import eu.europa.ec.dgc.validation.decorator.exception.NotFoundException;
 import eu.europa.ec.dgc.validation.decorator.exception.RepositoryException;
 import eu.europa.ec.dgc.validation.decorator.exception.UncheckedCertificateException;
@@ -80,14 +81,15 @@ public class ValidationStatusService {
     public ValidationServiceStatusResponse determineStatus(final String subject) {
         final ServiceTokenContentResponse tokenContent = this.getBackendTokenContent(subject);
         if (tokenContent.getSubjects() == null || tokenContent.getSubjects().isEmpty()) {
-            throw new NotFoundException("Subject not found in token");
+            throw new DccException("Subject not found in token", HttpStatus.NO_CONTENT.value());
         }
 
         final SubjectResponse subjectResponse = tokenContent.getSubjects().get(0);
         final String serviceId = subjectResponse.getServiceIdUsed();
         log.debug("Receive service ID (encoded) from booking service '{}'", serviceId);
         if (serviceId == null || serviceId.isBlank()) {
-            throw new NotFoundException(String.format("Passenger without service ID '%s'", serviceId));
+            throw new DccException(String.format("Subject without service ID '%s'", serviceId),
+                    HttpStatus.NO_CONTENT.value());
         }
 
         final String decodedServiceId = new String(Base64.getUrlDecoder().decode(serviceId), StandardCharsets.UTF_8);
