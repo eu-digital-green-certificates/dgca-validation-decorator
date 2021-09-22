@@ -51,7 +51,7 @@ public class DccTokenService {
 
     private static final String TYPE_VALIDATION_SERVICE = "ValidationService";
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-dd-MM'T'HH:mm:ssxxxxx");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssxxxxx");
 
     private final DgcProperties dgcProperties;
 
