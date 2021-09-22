@@ -30,6 +30,7 @@ import java.util.Map;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -77,9 +78,13 @@ public class CallbackController {
             if (tokenContent.containsKey("sub") && tokenContent.get("sub") instanceof String) {
                 
                 this.backendService.saveResult(subject, request);
-                return ResponseEntity.ok().build();
+                return ResponseEntity.ok()
+                        .cacheControl(CacheControl.noCache())
+                        .build();
             }
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .cacheControl(CacheControl.noCache())
+                .build();
     }
 }

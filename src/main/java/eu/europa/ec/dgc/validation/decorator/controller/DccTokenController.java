@@ -31,6 +31,7 @@ import java.util.Map;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -84,9 +85,14 @@ public class DccTokenController {
 
                 final HttpHeaders headers = new HttpHeaders();
                 headers.set("X-Nonce", accessTockenPayload.getNonce());
-                return ResponseEntity.ok().headers(headers).body(accessToken);
+                return ResponseEntity.ok()
+                        .headers(headers)
+                        .cacheControl(CacheControl.noCache())
+                        .body(accessToken);
             }
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .cacheControl(CacheControl.noCache())
+                .build();
     }
 }

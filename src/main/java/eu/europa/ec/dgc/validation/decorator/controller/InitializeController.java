@@ -27,7 +27,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,16 +40,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class InitializeController {
 
     static final String PATH = "/initialize/{subject}";
-    
+
     private final InitializeService initializeService;
 
     /**
      * Delivers data for a QR in JSON format.
-     * 
+     *
      * @param subject Subject
      * @return {@link QrCodeDto} content for QR code
      */
-    @Operation(summary = "The provision endpoint is the public endpoint for receiving the initialization QR Code", 
+    @Operation(summary = "The provision endpoint is the public endpoint for receiving the initialization QR Code",
             description = "The provision endpoint is the public endpoint for receiving the initialization QR Code")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "OK"),
@@ -57,9 +59,12 @@ public class InitializeController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     })
     @GetMapping(value = PATH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public QrCodeDto initialize(@PathVariable(value = "subject", required = true) final String subject) {
+    public ResponseEntity<QrCodeDto> initialize(
+            @PathVariable(value = "subject", required = true) final String subject) {
         log.debug("Incoming GET request to '{}' with subject '{}'", PATH, subject);
-        
-        return initializeService.getBySubject(subject); 
+
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noCache())
+                .body(initializeService.getBySubject(subject));
     }
 }

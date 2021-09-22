@@ -30,6 +30,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -73,11 +74,17 @@ public class ValidationStatusController {
                 final String subject = (String) tokenContent.get("sub");
                 final ValidationServiceStatusResponse status = this.validationStatusService.determineStatus(subject);
                 if (status.getResultToken() != null) {
-                    return ResponseEntity.status(status.getHttpStatusCode()).body(status.getResultToken());
+                    return ResponseEntity.status(status.getHttpStatusCode())
+                            .cacheControl(CacheControl.noCache())
+                            .body(status.getResultToken());
                 }
-                return ResponseEntity.status(status.getHttpStatusCode()).build();
+                return ResponseEntity.status(status.getHttpStatusCode())
+                        .cacheControl(CacheControl.noCache())
+                        .build();
             }
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .cacheControl(CacheControl.noCache())
+                .build();
     }
 }

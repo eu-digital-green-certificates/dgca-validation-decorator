@@ -74,6 +74,7 @@ public class IdentityService {
     }
 
     private List<VerificationIdentityResponse> getVerificationMethods(final String element, final String type) {
+        final String identityRoot = String.format("%s%s", dgcProperties.getServiceUrl(), IDENTITY_ROOT);
         final String identityPath = String.format("%s%s", dgcProperties.getServiceUrl(), IDENTITY_PATH);
 
         return keyProvider.getKeyNames(KeyType.ALL).stream()
@@ -81,7 +82,7 @@ public class IdentityService {
                 .map(keyName -> {
                     final VerificationIdentityResponse verificationMethod = new VerificationIdentityResponse();
                     verificationMethod.setId(String.format("%s/%s", identityPath, keyName));
-                    verificationMethod.setController(identityPath);
+                    verificationMethod.setController(identityRoot);
                     verificationMethod.setType(VERIFICATION_TYPE);
                     verificationMethod.setPublicKeyJwk(buildPublicKey(keyName));
                     return verificationMethod;
