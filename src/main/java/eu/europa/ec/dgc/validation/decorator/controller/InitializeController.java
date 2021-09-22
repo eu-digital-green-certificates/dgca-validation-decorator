@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class InitializeController {
 
     private static final String PATH = "/initialize/{subject}";
-    
+
     private final InitializeService initializeService;
 
     /**
@@ -59,9 +59,10 @@ public class InitializeController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     })
     @GetMapping(value = PATH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<QrCodeDto> initialize(@PathVariable(value = "subject", required = true) final String subject) {
+    public ResponseEntity<QrCodeDto> initialize(
+            @PathVariable(value = "subject", required = true) final String subject) {
         log.debug("Incoming GET request to '{}' with subject '{}'", PATH, subject);
-        
+
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noCache())
                 .body(initializeService.getBySubject(subject));
