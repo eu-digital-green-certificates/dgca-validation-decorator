@@ -27,7 +27,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,11 +39,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class IdentityController {
 
-    public static final String PATH_ALL = "/identity";
-    
-    private static final String PATH_ELEMENT = "/identity/{element}";
-    
-    private static final String PATH_ELEMENT_TYPE = "/identity/{element}/{type}";
+    static final String PATH_ALL = "/identity";
+
+    static final String PATH_ELEMENT = "/identity/{element}";
+
+    static final String PATH_ELEMENT_TYPE = "/identity/{element}/{type}";
 
     private final IdentityService identityService;
 
@@ -61,12 +63,14 @@ public class IdentityController {
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     })
-    @GetMapping(value = {PATH_ALL, PATH_ELEMENT, PATH_ELEMENT_TYPE}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IdentityResponse identity(
+    @GetMapping(value = { PATH_ALL, PATH_ELEMENT, PATH_ELEMENT_TYPE }, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<IdentityResponse> identity(
             @PathVariable(name = "element", required = false) final String element,
             @PathVariable(name = "type", required = false) final String type) {
         log.debug("Incoming GET request to '{}' with element '{}' and type '{}'", PATH_ELEMENT_TYPE, element, type);
 
-        return identityService.getIdentity(element, type);
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noCache())
+                .body(identityService.getIdentity(element, type));
     }
 }
