@@ -48,3 +48,4 @@ build/
 
 .settings.xml
 /bin/
+src/main/resources/application-local-cf.yml
