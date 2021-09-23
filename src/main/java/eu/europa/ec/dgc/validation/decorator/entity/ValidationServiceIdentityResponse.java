@@ -20,7 +20,6 @@
 
 package eu.europa.ec.dgc.validation.decorator.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
@@ -41,7 +40,6 @@ public class ValidationServiceIdentityResponse {
         
         private String controller;
         
-        @JsonProperty("publicKeyJWK")
         private PublicKeyJwk publicKeyJwk;
     }
     
