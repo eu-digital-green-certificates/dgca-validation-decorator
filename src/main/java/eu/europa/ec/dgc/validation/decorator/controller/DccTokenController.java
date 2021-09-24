@@ -79,7 +79,7 @@ public class DccTokenController {
             final Map<String, Object> tokenContent = this.accessTokenService.parseAccessToken(token);
             if (tokenContent.containsKey("sub") && tokenContent.get("sub") instanceof String) {
                 final String subject = (String) tokenContent.get("sub");
-                final AccessTokenPayload accessTockenPayload = dccTokenService
+                final AccessTokenPayload accessTockenPayload = this.dccTokenService
                         .getAccessTockenForValidationService(dccToken, subject);
                 final String accessToken = this.accessTokenService.buildAccessToken(accessTockenPayload);
 
