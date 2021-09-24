@@ -80,7 +80,7 @@ public class ValidationStatusService {
      */
     public ValidationServiceStatusResponse determineStatus(final String subject) {
         final ServiceTokenContentResponse tokenContent = this.getBackendTokenContent(subject);
-        if (tokenContent.getSubjects() == null || tokenContent.getSubjects().isEmpty()) {
+        if (tokenContent != null && tokenContent.getSubjects() == null || tokenContent.getSubjects().isEmpty()) {
             throw new DccException("Subject not found in token", HttpStatus.NO_CONTENT.value());
         }
 
