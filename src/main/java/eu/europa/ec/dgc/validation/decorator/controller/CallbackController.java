@@ -48,9 +48,9 @@ public class CallbackController {
     private static final String PATH = "/callback/{subject}";
 
     private final AccessTokenService accessTokenService;
-    
+
     private final BackendService backendService;
-    
+
     /**
      * Callback endpoint receives the validation result to a subject.
      * 
@@ -65,18 +65,18 @@ public class CallbackController {
         @ApiResponse(responseCode = "410", description = "Gone. Subject does not exist anymore"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    @PutMapping(value = PATH, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = { "/api" + PATH, PATH }, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity callback(
             @PathVariable(value = "subject", required = true) final String subject,
             @RequestHeader("Authorization") final String token,
-            @RequestHeader("X-Version") final String version, 
+            @RequestHeader("X-Version") final String version,
             @Valid @RequestBody final CallbackRequest request) {
         log.debug("Incoming PUT request to '{}' with subject '{}'", PATH, subject);
-        
+
         if (this.accessTokenService.isValid(token)) {
             final Map<String, Object> tokenContent = this.accessTokenService.parseAccessToken(token);
             if (tokenContent.containsKey("sub") && tokenContent.get("sub") instanceof String) {
-                
+
                 this.backendService.saveResult(subject, request);
                 return ResponseEntity.ok()
                         .cacheControl(CacheControl.noCache())

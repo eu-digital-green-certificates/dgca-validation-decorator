@@ -18,7 +18,7 @@ booking:
 #### Create Key: keytool -genkey -alias [ALIAS NAME] -keyalg EC -validity 3650 -keystore dev-decorator.jks -storetype JKS
 dgc:
   #### Validation Decorator URI without trailing slash
-  serviceUrl: http://localhost:8080
+  serviceUrl: http://localhost:8080/api
   keyStoreFile: certs/dev-decorator.jks
   keyStorePassword: changeMe
   privateKeyPassword: changeMe

@@ -58,7 +58,7 @@ public class InitializeController {
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     })
-    @GetMapping(value = PATH, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = { "/api" + PATH, PATH }, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<QrCodeDto> initialize(
             @PathVariable(value = "subject", required = true) final String subject) {
         log.debug("Incoming GET request to '{}' with subject '{}'", PATH, subject);

@@ -69,7 +69,8 @@ public class DccTokenController {
         @ApiResponse(responseCode = "410", description = "Gone. Repository service reports errors"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     })
-    @PostMapping(value = PATH, consumes = MediaType.APPLICATION_JSON_VALUE, produces = "application/jwt")
+    @PostMapping(value = { "/api" + PATH, PATH }, 
+        consumes = MediaType.APPLICATION_JSON_VALUE, produces = "application/jwt")
     public ResponseEntity<String> token(
             @RequestHeader("Authorization") final String token,
             @Valid @RequestBody final DccTokenRequest dccToken) {

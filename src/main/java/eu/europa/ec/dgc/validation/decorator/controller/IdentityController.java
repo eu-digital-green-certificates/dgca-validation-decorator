@@ -63,7 +63,8 @@ public class IdentityController {
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     })
-    @GetMapping(value = { PATH_ALL, PATH_ELEMENT, PATH_ELEMENT_TYPE }, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = { "/api" + PATH_ALL, "/api" + PATH_ELEMENT, "/api" + PATH_ELEMENT_TYPE,
+        PATH_ALL, PATH_ELEMENT, PATH_ELEMENT_TYPE }, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<IdentityResponse> identity(
             @PathVariable(name = "element", required = false) final String element,
             @PathVariable(name = "type", required = false) final String type) {

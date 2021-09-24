@@ -54,7 +54,7 @@ public class RejectController {
         @ApiResponse(responseCode = "401", description = "Unauthorized, if no access token are provided"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     })
-    @GetMapping(value = PATH)
+    @GetMapping(value = { "/api" + PATH, PATH })
     public ResponseEntity reject(@RequestHeader("Authorization") final String token) {
         log.debug("Incoming GET request to '{}' with token '{}'", PATH, token);
 
