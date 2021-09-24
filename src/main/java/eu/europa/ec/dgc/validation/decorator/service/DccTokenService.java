@@ -69,7 +69,7 @@ public class DccTokenService {
      */
     public AccessTokenPayload getAccessTockenForValidationService(
             final DccTokenRequest dccToken, final String subject) {
-        final ServiceProperties service = identityService.getServicePropertiesById(dccToken.getService());
+        final ServiceProperties service = this.identityService.getServicePropertiesById(dccToken.getService());
         if (!TYPE_VALIDATION_SERVICE.equalsIgnoreCase(service.getType())) {
             throw new NotImplementedException(String.format("Service type '%s' not implemented", service.getType()));
         }
