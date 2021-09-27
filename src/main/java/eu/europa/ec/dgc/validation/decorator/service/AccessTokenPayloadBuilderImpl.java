@@ -50,9 +50,9 @@ public class AccessTokenPayloadBuilderImpl implements AccessTokenPayloadBuilder 
             final SubjectResponse subjectResponse,
             final OccurrenceInfoResponse occurrenceInfo) {
         final AccessTokenConditions accessTokenConditions = new AccessTokenConditions();
-        accessTokenConditions.setLang(occurrenceInfo.getLanguage());
-        accessTokenConditions.setFnt(subjectResponse.getForename());
-        accessTokenConditions.setGnt(subjectResponse.getLastname());
+        accessTokenConditions.setLang(occurrenceInfo.getLanguage());        
+        accessTokenConditions.setGnt(subjectResponse.getForename());
+        accessTokenConditions.setFnt(subjectResponse.getLastname());
         accessTokenConditions.setCoa(occurrenceInfo.getCountryOfArrival());
         accessTokenConditions.setCod(occurrenceInfo.getCountryOfDeparture());
         accessTokenConditions.setRoa(occurrenceInfo.getRegionOfArrival());
