@@ -84,14 +84,17 @@ public class AccessTokenPayloadBuilderImpl implements AccessTokenPayloadBuilder 
             try {
                 return OffsetDateTime.parse(in).format(DOB_FORMATTER);
             } catch (Exception e) {
+                // not handle
             }
             try {
                 return LocalDate.parse(in, DateTimeFormatter.ofPattern("MM-dd-yyyy")).format(DOB_FORMATTER);
             } catch (Exception e) {
+                // not handle
             }
             try {
                 return in.substring(0, 10);
             } catch (Exception e) {
+                // not handle
             }
         }
         return in;
