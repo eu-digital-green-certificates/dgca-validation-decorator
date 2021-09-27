@@ -30,6 +30,8 @@
 
 This repository contains the source code of the EU Digital COVID Certificate Validation Decorator.
 
+The Validation Decorator is a template. To make your own adjustments, the three interfaces `KeyProvider`, `BackendRepository` and `AccessTokenPayloadBuilder` should be implemented.
+
 - [ ] TODO: Describe Component
 
 ## Development
