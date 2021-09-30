@@ -1,3 +1,4 @@
+
 package eu.europa.ec.dgc.validation.decorator.service;
 
 import eu.europa.ec.dgc.validation.decorator.config.DgcProperties.ServiceProperties;
@@ -20,9 +21,15 @@ import org.springframework.web.client.HttpClientErrorException;
 public class SubjectService {
 
     private final IdentityService identityService;
-    
+
     private final BackendRepository backendRepository;
-    
+
+    /**
+     * Determines the service based on the subject.
+     * 
+     * @param subject Sibject ID
+     * @return {@link ServiceProperties}
+     */
     public ServiceProperties getServiceBySubject(String subject) {
         final ServiceTokenContentResponse tokenContent = this.getBackendTokenContent(subject);
         if (tokenContent != null && tokenContent.getSubjects() == null || tokenContent.getSubjects().isEmpty()) {
@@ -36,7 +43,7 @@ public class SubjectService {
             throw new DccException(String.format("Subject without service ID '%s'", serviceId),
                     HttpStatus.NO_CONTENT.value());
         }
-        
+
         final String decodedServiceId = new String(Base64.getUrlDecoder().decode(serviceId), StandardCharsets.UTF_8);
         log.debug("Receive service ID (decoded) from booking service '{}'", decodedServiceId);
 
@@ -44,7 +51,7 @@ public class SubjectService {
         log.debug("Receive service: {}", service);
         return service;
     }
-    
+
     private ServiceTokenContentResponse getBackendTokenContent(final String subject) {
         try {
             return this.backendRepository.tokenContent(subject);

@@ -53,7 +53,8 @@ public class CallbackController {
      * 
      * @param subject Subject
      */
-    @Operation(summary = "The optional callback endpoint receives the validation result to a subject", description = "The optional callback endpoint receives the validation result to a subject")
+    @Operation(summary = "The optional callback endpoint receives the validation result to a subject", 
+            description = "The optional callback endpoint receives the validation result to a subject")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "OK"),
         @ApiResponse(responseCode = "401", description = "Unauthorized, if Result Token was not correctly signed"),
