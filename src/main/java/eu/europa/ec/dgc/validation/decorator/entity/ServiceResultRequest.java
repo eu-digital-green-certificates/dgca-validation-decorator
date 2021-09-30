@@ -59,5 +59,5 @@ public class ServiceResultRequest {
         private String type;
 
         private String details;
-    }    
+    }
 }
