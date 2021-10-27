@@ -30,7 +30,15 @@
 
 This repository contains the source code of the EU Digital COVID Certificate Validation Decorator.
 
-The Validation Decorator is a template. To make your own adjustments, the three interfaces `KeyProvider`, `BackendRepository` and `AccessTokenPayloadBuilder` should be implemented.
+The Validation Decorator is an interface between the [validation service](https://github.com/eu-digital-green-certificates/dgca-validation-service) and an internal [backend system](https://github.com/eu-digital-green-certificates/dgca-booking-demo-backend) (demo) for the exchange of digital covid certificate information.
+
+The validation has complex work flow that involves
+
+- [dgca-validation-service](https://github.com/eu-digital-green-certificates/dgca-validation-service) - additional service on travel system 
+- [dgca-booking-demo](https://github.com/eu-digital-green-certificates/dgca-booking-demo) - travel system mock
+- [dgca-booking-demo-frontend](https://github.com/eu-digital-green-certificates/dgca-booking-demo-frontend)
+- [dgca-verifier-app-android](https://github.com/eu-digital-green-certificates/dgca-verifier-app-android) - provide dcc
+- [dgca-booking-demo-backend](https://github.com/eu-digital-green-certificates/dgca-booking-demo-backend)
 
 ## Development
 
@@ -79,7 +87,13 @@ In either case open a terminal pointing to the directory you put the sources in.
 After all containers have started you will be able to reach the application on your [local machine](http://localhost:8080/dgci/status) under port 8080.
 ## Documentation
 
-- [ ] TODO: Documentation
+The Validation Decorator is a template. To make your own adjustments, the three interfaces `KeyProvider`, `BackendRepository` and `AccessTokenPayloadBuilder` should be implemented.
+
+`KeyProvider` provides the necessary keys and certificates. Separate keys for JWT, certificates for Validation Service and others are provided.
+
+`BackendRepository` provides the interface to the internal service. In this example [dgca-booking-demo-backend](https://github.com/eu-digital-green-certificates/dgca-booking-demo-backend) is connected and should demonstrate an airline.
+
+`AccessTokenPayloadBuilder` basically serves as a converter to create the `AccessTokenPayload` from the given data.
 
 ## Support and feedback
 
