@@ -64,7 +64,14 @@ public class ValidationServiceRepository {
         log.debug("REST Call to '{}' starting", url);
         final ResponseEntity<ValidationServiceIdentityResponse> response = this.restTpl
                 .getForEntity(url, ValidationServiceIdentityResponse.class);
-        return response.getBody();
+        
+        // Workaround: remove unsupported VerificationMethod
+        final ValidationServiceIdentityResponse resBody = response.getBody();
+        if (resBody.getVerificationMethod() != null) {
+            resBody.getVerificationMethod().removeIf(method -> method.getPublicKeyJwk() == null);    
+        }
+        
+        return resBody;
     }
 
     /**

@@ -18,46 +18,18 @@
  * ---license-end
  */
 
-package eu.europa.ec.dgc.validation.decorator.entity;
+package eu.europa.ec.dgc.validation.decorator.service;
 
-import java.util.List;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import lombok.Data;
+import eu.europa.ec.dgc.validation.decorator.dto.AccessTokenPayload;
+import eu.europa.ec.dgc.validation.decorator.entity.ServiceTokenContentResponse.OccurrenceInfoResponse;
+import eu.europa.ec.dgc.validation.decorator.entity.ServiceTokenContentResponse.SubjectResponse;
+import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceInitializeResponse;
 
-@Data
-public class ServiceResultRequest {
+public interface AccessTokenPayloadBuilder {
 
-    private String token;
-
-    @Valid
-    @NotNull
-    private DccStatusRequest dccStatus;
-
-    @Data
-    public static final class DccStatusRequest {
-
-        private String issuer;
-
-        private Long iat;
-
-        private String sub;
-
-        @Valid
-        @NotEmpty
-        private List<ResultRequest> results;
-    }
-
-    @Data
-    public static final class ResultRequest {
-
-        private String identifier;
-
-        private String result;
-
-        private String type;
-
-        private String details;
-    }
+    AccessTokenPayload build(
+            final String subject,
+            final ValidationServiceInitializeResponse initialize,
+            final SubjectResponse subjectResponse,
+            final OccurrenceInfoResponse occurrenceInfo);
 }

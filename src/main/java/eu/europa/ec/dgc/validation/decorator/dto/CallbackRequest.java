@@ -20,12 +20,14 @@
 
 package eu.europa.ec.dgc.validation.decorator.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import lombok.Data;
 
 @Data
 public class CallbackRequest {
 
+    @JsonProperty("iss")
     private String issuer;
     
     private Long iat;

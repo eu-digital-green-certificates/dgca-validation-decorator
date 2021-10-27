@@ -20,10 +20,8 @@
 
 package eu.europa.ec.dgc.validation.decorator.service;
 
-import eu.europa.ec.dgc.validation.decorator.config.DgcProperties;
 import eu.europa.ec.dgc.validation.decorator.config.DgcProperties.ServiceProperties;
 import eu.europa.ec.dgc.validation.decorator.dto.AccessTokenPayload;
-import eu.europa.ec.dgc.validation.decorator.dto.AccessTokenPayload.AccessTokenConditions;
 import eu.europa.ec.dgc.validation.decorator.dto.DccTokenRequest;
 import eu.europa.ec.dgc.validation.decorator.entity.ServiceTokenContentResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.ServiceTokenContentResponse.OccurrenceInfoResponse;
@@ -35,9 +33,6 @@ import eu.europa.ec.dgc.validation.decorator.exception.RepositoryException;
 import eu.europa.ec.dgc.validation.decorator.repository.BackendRepository;
 import eu.europa.ec.dgc.validation.decorator.repository.ValidationServiceRepository;
 import java.security.SecureRandom;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,15 +46,13 @@ public class DccTokenService {
 
     private static final String TYPE_VALIDATION_SERVICE = "ValidationService";
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssxxxxx");
-
-    private final DgcProperties dgcProperties;
-
     private final ValidationServiceRepository validationServiceRepository;
 
     private final BackendRepository backendRepository;
 
     private final IdentityService identityService;
+
+    private final AccessTokenPayloadBuilder accessTokenPayloadBuilder;
 
     /**
      * Request validation- and backend service to create token.
@@ -69,7 +62,7 @@ public class DccTokenService {
      */
     public AccessTokenPayload getAccessTockenForValidationService(
             final DccTokenRequest dccToken, final String subject) {
-        final ServiceProperties service = identityService.getServicePropertiesById(dccToken.getService());
+        final ServiceProperties service = this.identityService.getServicePropertiesById(dccToken.getService());
         if (!TYPE_VALIDATION_SERVICE.equalsIgnoreCase(service.getType())) {
             throw new NotImplementedException(String.format("Service type '%s' not implemented", service.getType()));
         }
@@ -85,7 +78,7 @@ public class DccTokenService {
         final SubjectResponse subjectResponse = tokenContent.getSubjects().get(0);
         final OccurrenceInfoResponse occurrenceInfo = tokenContent.getOccurrenceInfo();
 
-        final AccessTokenPayload accessToken = this.buildAccessToken(
+        final AccessTokenPayload accessToken = this.accessTokenPayloadBuilder.build(
                 subject, initialize, subjectResponse, occurrenceInfo);
         accessToken.setNonce(nonce);
         return accessToken;
@@ -95,43 +88,6 @@ public class DccTokenService {
         byte[] randomBytes = new byte[16];
         new SecureRandom().nextBytes(randomBytes);
         return Base64.getEncoder().encodeToString(randomBytes);
-    }
-
-    private AccessTokenPayload buildAccessToken(
-            final String subject,
-            final ValidationServiceInitializeResponse initialize,
-            final SubjectResponse subjectResponse,
-            final OccurrenceInfoResponse occurrenceInfo) {
-        final AccessTokenConditions accessTokenConditions = new AccessTokenConditions();
-        accessTokenConditions.setLang(occurrenceInfo.getLanguage());
-        accessTokenConditions.setFnt(subjectResponse.getForename());
-        accessTokenConditions.setGnt(subjectResponse.getLastname());
-        accessTokenConditions.setCoa(occurrenceInfo.getCountryOfArrival());
-        accessTokenConditions.setCod(occurrenceInfo.getCountryOfDeparture());
-        accessTokenConditions.setRoa(occurrenceInfo.getRegionOfArrival());
-        accessTokenConditions.setRod(occurrenceInfo.getRegionOfDeparture());
-        accessTokenConditions.setType(occurrenceInfo.getConditionTypes());
-        accessTokenConditions.setCategory(occurrenceInfo.getCategories());
-        if (subjectResponse.getBirthDate() != null && !subjectResponse.getBirthDate().isBlank()) {
-            accessTokenConditions.setDob(subjectResponse.getBirthDate());
-        }
-
-        final OffsetDateTime departureTime = occurrenceInfo.getDepartureTime();
-        accessTokenConditions.setValidFrom(departureTime.format(FORMATTER));
-        accessTokenConditions.setValidationClock(occurrenceInfo.getArrivalTime().format(FORMATTER));
-        accessTokenConditions.setValidTo(departureTime.plusDays(2).format(FORMATTER));
-
-        final AccessTokenPayload accessTokenPayload = new AccessTokenPayload();
-        accessTokenPayload.setJti(subjectResponse.getJti());
-        accessTokenPayload.setIss(this.dgcProperties.getToken().getIssuer());
-        accessTokenPayload.setIat(Instant.now().getEpochSecond());
-        accessTokenPayload.setExp(initialize.getExp());
-        accessTokenPayload.setSub(subject);
-        accessTokenPayload.setAud(initialize.getAud());
-        accessTokenPayload.setType(occurrenceInfo.getType());
-        accessTokenPayload.setConditions(accessTokenConditions);
-        accessTokenPayload.setVersion("1.0");
-        return accessTokenPayload;
     }
 
     private ValidationServiceInitializeResponse getValidationServiceInitialize(final DccTokenRequest dccToken,

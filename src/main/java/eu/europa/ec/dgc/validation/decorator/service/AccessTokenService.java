@@ -106,7 +106,7 @@ public class AccessTokenService {
         claims.put("vc", payload.getConditions());
 
         final JwtBuilder builder = this.getAccessTokenBuilder()
-                .setExpiration(new Date(payload.getExp()))
+                .setExpiration(new Date(payload.getExp() * 1000))
                 .addClaims(claims);
         return builder.compact();
     }
