@@ -62,7 +62,7 @@ public class ValidationServiceRepository {
                 .toUriString();
 
         log.debug("REST Call to '{}' starting", url);
-        final ResponseEntity<ValidationServiceIdentityResponse> response = restTpl
+        final ResponseEntity<ValidationServiceIdentityResponse> response = this.restTpl
                 .getForEntity(url, ValidationServiceIdentityResponse.class);
         
         // Workaround: remove unsupported VerificationMethod
@@ -108,12 +108,12 @@ public class ValidationServiceRepository {
 
         final HttpHeaders headers = new HttpHeaders();
         headers.add("X-Version", "1.0");
-        headers.add("Authorization", accessTokenService.buildHeaderToken(subject));
+        headers.add("Authorization", this.accessTokenService.buildHeaderToken(subject));
 
         final HttpEntity<ValidationServiceInitializeRequest> entity = new HttpEntity<>(body, headers);
 
         log.debug("REST Call to '{}' starting", url);
-        final ResponseEntity<ValidationServiceInitializeResponse> response = restTpl
+        final ResponseEntity<ValidationServiceInitializeResponse> response = this.restTpl
                 .exchange(url, HttpMethod.PUT, entity, ValidationServiceInitializeResponse.class);
         return response.getBody();
     }
@@ -131,12 +131,12 @@ public class ValidationServiceRepository {
 
         final HttpHeaders headers = new HttpHeaders();
         headers.add("X-Version", "1.0");
-        headers.add("Authorization", accessTokenService.buildHeaderToken(subject));
+        headers.add("Authorization", this.accessTokenService.buildHeaderToken(subject));
 
         final HttpEntity<String> entity = new HttpEntity<>(headers);
 
         log.debug("REST Call to '{}' starting", url);
-        final ResponseEntity<String> response = restTpl.exchange(url, HttpMethod.GET, entity, String.class);
+        final ResponseEntity<String> response = this.restTpl.exchange(url, HttpMethod.GET, entity, String.class);
         switch (response.getStatusCode()) {
             case OK:
                 return new ValidationServiceStatusResponse(response.getStatusCodeValue(), response.getBody());

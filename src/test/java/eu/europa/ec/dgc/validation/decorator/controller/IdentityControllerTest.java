@@ -30,6 +30,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -45,15 +48,23 @@ class IdentityControllerTest {
     void identityAll_withoutVariales_successWithAllIdentities() {
         // GIVEN
         final String url = UriComponentsBuilder.fromUriString("http://localhost")
-                .port(port)
+                .port(this.port)
                 .path(IdentityController.PATH_ALL)
                 .toUriString();
         // WHEN
-        final IdentityResponse result = restTpl.getForObject(url, IdentityResponse.class);
+        final ResponseEntity<IdentityResponse> result = this.restTpl.exchange(
+                url, HttpMethod.GET, null, IdentityResponse.class);
         // THEN
         assertThat(result).isNotNull();
-        assertThat(result.getVerificationMethod()).hasSizeGreaterThanOrEqualTo(4);
-        assertThat(result.getService()).hasSizeGreaterThanOrEqualTo(4);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        // AND header
+        assertThat(result.getHeaders()).containsKeys("Cache-Control");
+        assertThat(result.getHeaders().get("Cache-Control")).contains("no-cache");
+        // AND body / identity
+        final IdentityResponse identity = result.getBody();
+        assertThat(identity).isNotNull();
+        assertThat(identity.getVerificationMethod()).hasSizeGreaterThanOrEqualTo(4);
+        assertThat(identity.getService()).hasSizeGreaterThanOrEqualTo(4);
     }
 
     @ParameterizedTest
@@ -61,20 +72,27 @@ class IdentityControllerTest {
     void identityElement_withElement_successWithElement(final String element) {
         // GIVEN 
         final String url = UriComponentsBuilder.fromUriString("http://localhost")
-                .port(port)
+                .port(this.port)
                 .path(IdentityController.PATH_ELEMENT.replace("{element}", element))
                 .toUriString();
         // WHEN 
-        final IdentityResponse result = restTpl.getForObject(url, IdentityResponse.class);
+        final ResponseEntity<IdentityResponse> result = this.restTpl.exchange(
+                url, HttpMethod.GET, null, IdentityResponse.class);
         // THEN
         assertThat(result).isNotNull();
-        // AND
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        // AND header
+        assertThat(result.getHeaders()).containsKeys("Cache-Control");
+        assertThat(result.getHeaders().get("Cache-Control")).contains("no-cache");
+        // AND body / identity
+        final IdentityResponse identity = result.getBody();
+        assertThat(identity).isNotNull();
         if ("verificationMethod".equals(element)) {
-            assertThat(result.getVerificationMethod()).hasSizeGreaterThanOrEqualTo(4);
-            assertThat(result.getService()).hasSize(0);
+            assertThat(identity.getVerificationMethod()).hasSizeGreaterThanOrEqualTo(4);
+            assertThat(identity.getService()).hasSize(0);
         } else {
-            assertThat(result.getVerificationMethod()).hasSize(0);
-            assertThat(result.getService()).hasSizeGreaterThanOrEqualTo(4);
+            assertThat(identity.getVerificationMethod()).hasSize(0);
+            assertThat(identity.getService()).hasSizeGreaterThanOrEqualTo(4);
         }
     }
 
@@ -85,14 +103,22 @@ class IdentityControllerTest {
         // GIVEN
         String element = "service";
         final String url = UriComponentsBuilder.fromUriString("http://localhost")
-                .port(port)
+                .port(this.port)
                 .path(IdentityController.PATH_ELEMENT_TYPE.replace("{element}", element).replace("{type}", type))
                 .toUriString();
         // WHEN
-        final IdentityResponse result = restTpl.getForObject(url, IdentityResponse.class);
+        final ResponseEntity<IdentityResponse> result = restTpl.exchange(url, HttpMethod.GET, null,
+                IdentityResponse.class);
         // THEN
         assertThat(result).isNotNull();
-        assertThat(result.getVerificationMethod()).hasSize(0);
-        assertThat(result.getService()).hasSize(1);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        // AND header
+        assertThat(result.getHeaders()).containsKeys("Cache-Control");
+        assertThat(result.getHeaders().get("Cache-Control")).contains("no-cache");
+        // AND body / identity
+        final IdentityResponse identity = result.getBody();
+        assertThat(identity).isNotNull();
+        assertThat(identity.getVerificationMethod()).hasSize(0);
+        assertThat(identity.getService()).hasSize(1);
     }
 }

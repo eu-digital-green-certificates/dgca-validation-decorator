@@ -27,17 +27,13 @@ import static org.mockito.Mockito.when;
 import eu.europa.ec.dgc.validation.decorator.dto.DccTokenRequest;
 import eu.europa.ec.dgc.validation.decorator.dto.IdentityResponse.ServiceIdentityResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.ServiceTokenContentResponse;
-import eu.europa.ec.dgc.validation.decorator.entity.ServiceTokenContentResponse.OccurrenceInfoResponse;
-import eu.europa.ec.dgc.validation.decorator.entity.ServiceTokenContentResponse.SubjectResponse;
 import eu.europa.ec.dgc.validation.decorator.entity.ValidationServiceInitializeResponse;
 import eu.europa.ec.dgc.validation.decorator.repository.BackendRepository;
 import eu.europa.ec.dgc.validation.decorator.repository.ValidationServiceRepository;
 import eu.europa.ec.dgc.validation.decorator.service.AccessTokenService;
 import eu.europa.ec.dgc.validation.decorator.service.IdentityService;
+import eu.europa.ec.dgc.validation.decorator.util.TestHelper;
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -85,10 +81,11 @@ class DccTokenControllerTest {
         this.subject = UUID.randomUUID().toString();
         this.service = this.identityService.getIdentity("service", "ValidationService").getService().get(0);
 
-        final ValidationServiceInitializeResponse initialize = this.buildValidationServiceInitializeMock();
+        final ValidationServiceInitializeResponse initialize = this.buildValidationServiceInitialize();
         when(this.validationServiceRepositoryMock.initialize(any(), any(), any(), any())).thenReturn(initialize);
 
-        final ServiceTokenContentResponse tokenContent = this.buildServiceTokenContentMock();
+        final ServiceTokenContentResponse tokenContent = TestHelper.buildServiceTokenContent(
+                this.subject, this.service);
         when(this.backendRepository.tokenContent(any())).thenReturn(tokenContent);
         when(this.backendRepository.tokenContent(any(), any())).thenReturn(tokenContent);
     }
@@ -115,7 +112,11 @@ class DccTokenControllerTest {
         assertThat(result).isNotNull();
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(result.getBody()).isNotBlank();
-        assertThat(accessTokenService.isValid(result.getBody())).isTrue();
+        assertThat(this.accessTokenService.isValid(result.getBody())).isTrue();
+        // AND header 
+        assertThat(result.getHeaders()).containsKeys("X-Nonce", "Cache-Control");
+        assertThat(result.getHeaders().get("X-Nonce")).isNotNull().isNotEmpty();
+        assertThat(result.getHeaders().get("Cache-Control")).contains("no-cache");
         // AND tokenContent
         final Map<String, Object> tokenContent = accessTokenService.parseAccessToken(result.getBody());
         assertThat(tokenContent)
@@ -128,45 +129,11 @@ class DccTokenControllerTest {
                 "validationClock", "validFrom", "validTo");
     }
 
-    private ValidationServiceInitializeResponse buildValidationServiceInitializeMock() {
+    private ValidationServiceInitializeResponse buildValidationServiceInitialize() {
         final ValidationServiceInitializeResponse initialize = new ValidationServiceInitializeResponse();
-        initialize.setSubject(subject);
+        initialize.setSubject(this.subject);
         initialize.setExp(Instant.now().plusSeconds(60).toEpochMilli());
         initialize.setAud("ValidationServiceInitializeResponse");
         return initialize;
-    }
-
-    private ServiceTokenContentResponse buildServiceTokenContentMock() {
-        final String serviceId = Base64.getUrlEncoder().withoutPadding().encodeToString(service.getId().getBytes());
-        final SubjectResponse subjectResponse = new SubjectResponse();
-        subjectResponse.setId(UUID.fromString(subject));
-        subjectResponse.setForename("Lionel");
-        subjectResponse.setLastname("Kuhic");
-        subjectResponse.setBirthDate("1994-05-25");
-        subjectResponse.setServiceIdUsed(serviceId);
-        subjectResponse.setJti(UUID.randomUUID().toString());
-
-        final OffsetDateTime departureTime = OffsetDateTime.now().plusDays(1);
-        final OccurrenceInfoResponse occurrenceInfo = new OccurrenceInfoResponse();
-        occurrenceInfo.setFrom("East Kizzieshire");
-        occurrenceInfo.setTo("South Duncanhaven");
-        occurrenceInfo.setTime(departureTime);
-        occurrenceInfo.setType(2);
-        occurrenceInfo.setCategories(Arrays.asList("Standard"));
-        occurrenceInfo.setConditionTypes(Arrays.asList("r", "v", "t"));
-        occurrenceInfo.setCountryOfArrival("TT");
-        occurrenceInfo.setRegionOfArrival("TT");
-        occurrenceInfo.setCountryOfDeparture("TD");
-        occurrenceInfo.setRegionOfDeparture("TD");
-        occurrenceInfo.setDepartureTime(departureTime);
-        occurrenceInfo.setArrivalTime(departureTime.plusHours(8).plusMinutes(24));
-        occurrenceInfo.setLanguage("en-en");
-
-        final ServiceTokenContentResponse tokenContent = new ServiceTokenContentResponse();
-        tokenContent.setReference("TestBookingReference");
-        tokenContent.setTime(OffsetDateTime.now());
-        tokenContent.getSubjects().add(subjectResponse);
-        tokenContent.setFlightInfo(occurrenceInfo);
-        return tokenContent;
     }
 }

@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class RejectController {
 
-    private static final String PATH = "/reject";
+    static final String PATH = "/reject";
 
     private final AccessTokenService accessTokenService;
 

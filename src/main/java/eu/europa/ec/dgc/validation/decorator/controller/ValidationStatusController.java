@@ -43,7 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class ValidationStatusController {
 
-    private static final String PATH = "/status";
+    static final String PATH = "/status";
 
     private final ValidationStatusService validationStatusService;
 
