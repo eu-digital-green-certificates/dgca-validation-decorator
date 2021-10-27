@@ -62,9 +62,10 @@ public class AccessTokenPayloadBuilderImpl implements AccessTokenPayloadBuilder 
         accessTokenConditions.setDob(this.parseBirthDay(subjectResponse.getBirthDate()));
 
         final OffsetDateTime departureTime = occurrenceInfo.getDepartureTime();
-        accessTokenConditions.setValidFrom(departureTime.format(FORMATTER));
-        accessTokenConditions.setValidationClock(occurrenceInfo.getArrivalTime().format(FORMATTER));
-        accessTokenConditions.setValidTo(departureTime.plusDays(2).format(FORMATTER));
+        final OffsetDateTime arrivalTime = occurrenceInfo.getArrivalTime();
+        accessTokenConditions.setValidFrom(departureTime.format(FORMATTER));        
+        accessTokenConditions.setValidationClock(arrivalTime.format(FORMATTER));
+        accessTokenConditions.setValidTo(arrivalTime.format(FORMATTER));
 
         final AccessTokenPayload accessTokenPayload = new AccessTokenPayload();
         accessTokenPayload.setJti(subjectResponse.getJti());

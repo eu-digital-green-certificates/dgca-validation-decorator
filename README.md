@@ -30,23 +30,70 @@
 
 This repository contains the source code of the EU Digital COVID Certificate Validation Decorator.
 
-The Validation Decorator is a template. To make your own adjustments, the three interfaces `KeyProvider`, `BackendRepository` and `AccessTokenPayloadBuilder` should be implemented.
+The Validation Decorator is an interface between the [validation service](https://github.com/eu-digital-green-certificates/dgca-validation-service) and an internal [backend system](https://github.com/eu-digital-green-certificates/dgca-booking-demo-backend) (demo) for the exchange of digital covid certificate information.
 
-- [ ] TODO: Describe Component
+The validation has complex work flow that involves
+
+- [dgca-validation-service](https://github.com/eu-digital-green-certificates/dgca-validation-service) - additional service on travel system 
+- [dgca-booking-demo](https://github.com/eu-digital-green-certificates/dgca-booking-demo) - travel system mock
+- [dgca-booking-demo-frontend](https://github.com/eu-digital-green-certificates/dgca-booking-demo-frontend)
+- [dgca-verifier-app-android](https://github.com/eu-digital-green-certificates/dgca-verifier-app-android) - provide dcc
+- [dgca-booking-demo-backend](https://github.com/eu-digital-green-certificates/dgca-booking-demo-backend)
 
 ## Development
 
 ### Prerequisites
 
-- [ ] TODO: Prerequisites
+- [Open JDK 11](https://openjdk.java.net)
+- [Maven](https://maven.apache.org)
+- [Docker](https://www.docker.com)
+- Authenticate to [Github Packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry)
+
+#### Authenticating in to GitHub Packages
+
+As some of the required libraries (and/or versions are pinned/available only from GitHub Packages) You need to authenticate
+to [GitHub Packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry)
+The following steps need to be followed
+
+- Create [PAT](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) with scopes:
+    - `read:packages` for downloading packages
+
+##### GitHub Maven
+
+- Copy/Augment `~/.m2/settings.xml` with the contents of `settings.xml` present in this repository
+    - Replace `${app.packages.username}` with your github username
+    - Replace `${app.packages.password}` with the generated PAT
+
+##### GitHub Docker Registry
+
+- Run `docker login docker.pkg.github.com/eu-digital-green-certificates` before running further docker commands.
+    - Use your GitHub username as username
+    - Use the generated PAT as password
 
 ### Build
 
-- [ ] TODO: Build
+Whether you cloned or downloaded the 'zipped' sources you will either find the sources in the chosen checkout-directory or get a zip file with the source code, which you can expand to a folder of your choice.
 
+In either case open a terminal pointing to the directory you put the sources in. The local build process is described afterwards depending on the way you choose.
+
+### Build with maven
+* Check [settings.xml](settings.xml) in root folder and copy the servers to your own `~/.m2/settings.xml` to connect the GitHub repositories we use in our code. Provide your GitHub username and access token (see [GitHub Help](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token)) under the variables suggested.
+* Run `mvn clean package` from the project root folder
+
+### Run with docker
+* Perform maven build as described above
+* Run `docker-compose up` from the project root folder
+
+After all containers have started you will be able to reach the application on your [local machine](http://localhost:8080/dgci/status) under port 8080.
 ## Documentation
 
-- [ ] TODO: Documentation
+The Validation Decorator is a template. To make your own adjustments, the three interfaces `KeyProvider`, `BackendRepository` and `AccessTokenPayloadBuilder` should be implemented.
+
+`KeyProvider` provides the necessary keys and certificates. Separate keys for JWT, certificates for Validation Service and others are provided.
+
+`BackendRepository` provides the interface to the internal service. In this example [dgca-booking-demo-backend](https://github.com/eu-digital-green-certificates/dgca-booking-demo-backend) is connected and should demonstrate an airline.
+
+`AccessTokenPayloadBuilder` basically serves as a converter to create the `AccessTokenPayload` from the given data.
 
 ## Support and feedback
 
