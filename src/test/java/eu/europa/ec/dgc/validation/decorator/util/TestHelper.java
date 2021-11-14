@@ -89,7 +89,7 @@ public class TestHelper {
         publicKeyJwk.setUse("sig");
         publicKeyJwk.setAlg("ES256");
         publicKeyJwk.setKid("MFkwEwYHKu+=");
-        publicKeyJwk.setX5c("MIIB4DCCAYegAwIBAgIUVuls/1X3r1LY9+KcbRnX1ixbl8YwCgYIKoZIzj0EAwIw"
+        publicKeyJwk.setX5c(new String[]{"MIIB4DCCAYegAwIBAgIUVuls/1X3r1LY9+KcbRnX1ixbl8YwCgYIKoZIzj0EAwIw"
                 + "RTELMAkGA1UEBhMCREUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGElu"
                 + "dGVybmV0IFdpZGdpdHMgUHR5IEx0ZDAgFw0yMTA5MjMwODMxMDRaGA8yMTIwMDQx"
                 + "NzA4MzEwNFowRTELMAkGA1UEBhMCREUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAf"
@@ -99,7 +99,7 @@ public class TestHelper {
                 + "G+x2DPISjaXTWsTOdDAfBgNVHSMEGDAWgBSaqFjzps1qG+x2DPISjaXTWsTOdDAP"
                 + "BgNVHRMBAf8EBTADAQH/MAoGCCqGSM49BAMCA0cAMEQCIC/VAxhYH0HGDgcHIJwJ"
                 + "QXgThit8ZVqAxwzcK2/CUZPRAiASv2PY68vYaHSUZSICg80zO3puKPfum9126fmU"
-                + "4LlytA==");
+                + "4LlytA=="});
 
         final VerificationMethod sig = new VerificationMethod();
         sig.setType("JsonWebKey2020");

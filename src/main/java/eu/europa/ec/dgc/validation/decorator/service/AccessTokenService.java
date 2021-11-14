@@ -119,7 +119,7 @@ public class AccessTokenService {
      */
     public Map<String, Object> parseAccessToken(final String token) {
         final String activeSignKey = this.keyProvider.getActiveSignKey();
-        final PublicKey publicKey = this.keyProvider.receiveCertificate(activeSignKey).getPublicKey();
+        final PublicKey publicKey = this.keyProvider.receiveCertificate(activeSignKey).get(0).getPublicKey();
         final String issuer = this.properties.getToken().getIssuer();
 
         final Map<String, Object> body = this.parseAccessToken(token, publicKey, issuer);

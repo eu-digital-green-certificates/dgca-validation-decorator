@@ -26,6 +26,8 @@ import eu.europa.ec.dgc.validation.decorator.entity.KeyType;
 import eu.europa.ec.dgc.validation.decorator.entity.KeyUse;
 import eu.europa.ec.dgc.validation.decorator.exception.DccException;
 import eu.europa.ec.dgc.validation.decorator.exception.NotImplementedException;
+import io.jsonwebtoken.lang.Collections;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,6 +44,8 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +62,7 @@ public class KeyStoreKeyProvider implements KeyProvider {
 
     private final DgcProperties dgcConfigProperties;
 
-    private final Map<String, Certificate> certificates = new HashMap<>();
+    private final Map<String, List<Certificate>> certificates = new HashMap<>();
 
     private final Map<String, PrivateKey> privateKeys = new HashMap<>();
 
@@ -98,8 +102,9 @@ public class KeyStoreKeyProvider implements KeyProvider {
             final char[] privateKeyPassword = this.dgcConfigProperties.getPrivateKeyPassword().toCharArray();
             keyStore.load(is, privateKeyPassword);
             final KeyStore.PasswordProtection keyPassword = new KeyStore.PasswordProtection(keyStorePassword);
-
-            for (final String alias : this.getKeyNames(KeyType.ALL)) {
+            String[] keyNames = this.getKeyNames(KeyType.ALL).toArray(new String[0]);
+            Arrays.sort(keyNames);
+            for (final String alias :keyNames) {
                 if (keyStore.isKeyEntry(alias)) {
                     final PrivateKeyEntry privateKeyEntry = (PrivateKeyEntry) keyStore.getEntry(alias, keyPassword);
                     if (privateKeyEntry != null) {
@@ -114,25 +119,38 @@ public class KeyStoreKeyProvider implements KeyProvider {
     }
 
     private void handleCertificate(final String alias, final X509Certificate cert) {
-        this.certificates.put(alias, cert);
 
-        final String kid = new CertificateUtils().getCertKid((X509Certificate) cert);
-        this.kids.put(alias, kid);
-        this.kidToName.put(kid, alias);
-
-        if (cert.getSigAlgOID().contains("1.2.840.113549.1.1.1")) {
-            this.algs.put(alias, "RS256");
-        } else if (cert.getSigAlgOID().contains("1.2.840.113549.1.1.10")) {
-            this.algs.put(alias, "PS256");
-        } else if (cert.getSigAlgOID().contains("1.2.840.10045.4.3.2")) {
-            this.algs.put(alias, "ES256");
-        } else {
-            throw new NotImplementedException(String.format("SigAlg OID '{}'", cert.getSigAlgOID()));
+        if (alias.contains("_") && this.certificates.containsKey(alias.substring(0, alias.indexOf("_")))) {
+            String mapAlias = alias.substring(0,alias.indexOf("_"));
+            List<Certificate> certs = this.certificates.get(mapAlias);
+            if (certs != null) {
+                certs.add(cert);
+            }
         }
+        else {
+            List<Certificate> certs = new ArrayList<>();
+            certs.add(cert);
+            this.certificates.put(alias,certs);
+
+            final String kid = new CertificateUtils().getCertKid((X509Certificate) cert);
+            this.kids.put(alias, kid);
+            this.kidToName.put(kid, alias);
+    
+            if (cert.getSigAlgOID().contains("1.2.840.113549.1.1.1")) {
+                this.algs.put(alias, "RS256");
+            } else if (cert.getSigAlgOID().contains("1.2.840.113549.1.1.10")) {
+                this.algs.put(alias, "PS256");
+            } else if (cert.getSigAlgOID().contains("1.2.840.10045.4.3.2")) {
+                this.algs.put(alias, "ES256");
+            } else {
+                throw new NotImplementedException(String.format("SigAlg OID '{}'", cert.getSigAlgOID()));
+            }
+        }
+        
     }
 
     @Override
-    public Certificate receiveCertificate(final String keyName) {
+    public List<Certificate> receiveCertificate(final String keyName) {
         return this.certificates.get(keyName);
     }
 

@@ -187,7 +187,7 @@ public class ValidationStatusService {
     }
 
     private PublicKey toPublicKey(final PublicKeyJwk publicKeyJwk) {
-        final byte[] encoded = Base64.getDecoder().decode(publicKeyJwk.getX5c());
+        final byte[] encoded = Base64.getDecoder().decode(publicKeyJwk.getX5c()[0]);
         try (ByteArrayInputStream encStream = new ByteArrayInputStream(encoded)) {
             return CertificateFactory.getInstance("X.509").generateCertificate(encStream).getPublicKey();
         } catch (CertificateException e) {

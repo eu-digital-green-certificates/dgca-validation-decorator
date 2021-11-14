@@ -53,7 +53,7 @@ public class IdentityResponse {
     @Data
     public static final class PublicKeyJwkIdentityResponse {
         
-        private String x5c;
+        private String[] x5c;
         
         private String kid;
         

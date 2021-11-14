@@ -48,7 +48,7 @@ public class ValidationServiceIdentityResponse {
     @Data
     public static final class PublicKeyJwk {
 
-        private String x5c;
+        private String[] x5c;
 
         private String kid;
 
