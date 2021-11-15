@@ -26,8 +26,6 @@ import eu.europa.ec.dgc.validation.decorator.entity.KeyType;
 import eu.europa.ec.dgc.validation.decorator.entity.KeyUse;
 import eu.europa.ec.dgc.validation.decorator.exception.DccException;
 import eu.europa.ec.dgc.validation.decorator.exception.NotImplementedException;
-import io.jsonwebtoken.lang.Collections;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -126,8 +124,7 @@ public class KeyStoreKeyProvider implements KeyProvider {
             if (certs != null) {
                 certs.add(cert);
             }
-        }
-        else {
+        } else {
             List<Certificate> certs = new ArrayList<>();
             certs.add(cert);
             this.certificates.put(alias,certs);
