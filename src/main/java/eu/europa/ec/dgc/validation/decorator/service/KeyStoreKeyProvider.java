@@ -42,6 +42,8 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +60,7 @@ public class KeyStoreKeyProvider implements KeyProvider {
 
     private final DgcProperties dgcConfigProperties;
 
-    private final Map<String, Certificate> certificates = new HashMap<>();
+    private final Map<String, Certificate[]> certificates = new HashMap<>();
 
     private final Map<String, PrivateKey> privateKeys = new HashMap<>();
 
@@ -98,8 +100,9 @@ public class KeyStoreKeyProvider implements KeyProvider {
             final char[] privateKeyPassword = this.dgcConfigProperties.getPrivateKeyPassword().toCharArray();
             keyStore.load(is, privateKeyPassword);
             final KeyStore.PasswordProtection keyPassword = new KeyStore.PasswordProtection(keyStorePassword);
-
-            for (final String alias : this.getKeyNames(KeyType.ALL)) {
+            String[] keyNames = this.getKeyNames(KeyType.ALL).toArray(new String[0]);
+            Arrays.sort(keyNames);
+            for (final String alias :keyNames) {
                 if (keyStore.isKeyEntry(alias)) {
                     final PrivateKeyEntry privateKeyEntry = (PrivateKeyEntry) keyStore.getEntry(alias, keyPassword);
                     if (privateKeyEntry != null) {
@@ -107,14 +110,21 @@ public class KeyStoreKeyProvider implements KeyProvider {
                         this.privateKeys.put(alias, privateKey);
                     }
                 }
-                final X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
-                this.handleCertificate(alias, cert);
+                final Certificate cert = keyStore.getCertificate(alias);
+                List<Certificate> certificates = new ArrayList<Certificate>();
+                if (keyStore.getCertificateChain(alias) != null) {
+                    certificates.addAll(Arrays.asList(keyStore.getCertificateChain(alias)));
+                } else {
+                    certificates.add(cert);
+                }  
+                this.handleCertificate(alias, certificates.toArray(new X509Certificate[0]));
             }
         }
     }
 
-    private void handleCertificate(final String alias, final X509Certificate cert) {
-        this.certificates.put(alias, cert);
+    private void handleCertificate(final String alias, final Certificate[] certs) {
+        X509Certificate cert = (X509Certificate)certs[0];
+        this.certificates.put(alias,certs);
 
         final String kid = new CertificateUtils().getCertKid((X509Certificate) cert);
         this.kids.put(alias, kid);
@@ -132,7 +142,7 @@ public class KeyStoreKeyProvider implements KeyProvider {
     }
 
     @Override
-    public Certificate receiveCertificate(final String keyName) {
+    public Certificate[] receiveCertificate(final String keyName) {
         return this.certificates.get(keyName);
     }
 

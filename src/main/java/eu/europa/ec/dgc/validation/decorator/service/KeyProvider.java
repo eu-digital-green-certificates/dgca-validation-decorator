@@ -28,7 +28,7 @@ import java.util.List;
 
 public interface KeyProvider {
 
-    Certificate receiveCertificate(String keyName);
+    Certificate[] receiveCertificate(String keyName);
 
     PrivateKey receivePrivateKey(String keyName);
 

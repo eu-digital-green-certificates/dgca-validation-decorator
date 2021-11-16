@@ -32,6 +32,7 @@ import eu.europa.ec.dgc.validation.decorator.exception.NotFoundException;
 import io.vavr.collection.Stream;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -123,10 +124,18 @@ public class IdentityService {
     }
 
     private PublicKeyJwkIdentityResponse buildPublicKey(String keyName) {
-        final Certificate certificate = keyProvider.receiveCertificate(keyName);
+        final Certificate[] certificate = keyProvider.receiveCertificate(keyName);
+        if (certificate == null) {
+            return null;
+        }
         try {
             final PublicKeyJwkIdentityResponse publicKeyJwk = new PublicKeyJwkIdentityResponse();
-            publicKeyJwk.setX5c(Base64.getEncoder().encodeToString(certificate.getEncoded()));
+            List<String> x5c = new ArrayList<String>();
+            for (Certificate cert : certificate) {
+                x5c.add(Base64.getEncoder().encodeToString(cert.getEncoded()));
+            }
+
+            publicKeyJwk.setX5c(x5c.toArray(new String[0]));                                       
             publicKeyJwk.setKid(keyProvider.getKid(keyName));
             publicKeyJwk.setAlg(keyProvider.getAlg(keyName));
             publicKeyJwk.setUse(keyProvider.getKeyUse(keyName).name().toLowerCase());
