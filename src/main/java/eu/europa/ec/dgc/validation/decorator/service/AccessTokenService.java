@@ -119,9 +119,8 @@ public class AccessTokenService {
      */
     public Map<String, Object> parseAccessToken(final String token) {
         final String activeSignKey = this.keyProvider.getActiveSignKey();
-        final PublicKey publicKey = this.keyProvider.receiveCertificate(activeSignKey).get(0).getPublicKey();
+        final PublicKey publicKey = this.keyProvider.receiveCertificate(activeSignKey)[0].getPublicKey();
         final String issuer = this.properties.getToken().getIssuer();
-
         final Map<String, Object> body = this.parseAccessToken(token, publicKey, issuer);
         if (!body.containsKey("sub")) {
             throw new DccException("Token invalid: subjet not found");

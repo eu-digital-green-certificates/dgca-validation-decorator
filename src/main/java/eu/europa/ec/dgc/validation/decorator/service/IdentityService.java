@@ -124,7 +124,7 @@ public class IdentityService {
     }
 
     private PublicKeyJwkIdentityResponse buildPublicKey(String keyName) {
-        final List<Certificate> certificate = keyProvider.receiveCertificate(keyName);
+        final Certificate[] certificate = keyProvider.receiveCertificate(keyName);
         if (certificate == null) {
             return null;
         }

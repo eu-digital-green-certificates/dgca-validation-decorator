@@ -60,7 +60,7 @@ public class KeyStoreKeyProvider implements KeyProvider {
 
     private final DgcProperties dgcConfigProperties;
 
-    private final Map<String, List<Certificate>> certificates = new HashMap<>();
+    private final Map<String, Certificate[]> certificates = new HashMap<>();
 
     private final Map<String, PrivateKey> privateKeys = new HashMap<>();
 
@@ -110,44 +110,39 @@ public class KeyStoreKeyProvider implements KeyProvider {
                         this.privateKeys.put(alias, privateKey);
                     }
                 }
-                final X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
-                this.handleCertificate(alias, cert);
+                final Certificate cert = keyStore.getCertificate(alias);
+                List<Certificate> certificates = new ArrayList<Certificate>();
+                if (keyStore.getCertificateChain(alias) != null) {
+                    certificates.addAll(Arrays.asList(keyStore.getCertificateChain(alias)));
+                } else {
+                    certificates.add(cert);
+                }  
+                this.handleCertificate(alias, certificates.toArray(new X509Certificate[0]));
             }
         }
     }
 
-    private void handleCertificate(final String alias, final X509Certificate cert) {
+    private void handleCertificate(final String alias, final Certificate[] certs) {
+        X509Certificate cert = (X509Certificate)certs[0];
+        this.certificates.put(alias,certs);
 
-        if (alias.contains("_") && this.certificates.containsKey(alias.substring(0, alias.indexOf("_")))) {
-            String mapAlias = alias.substring(0,alias.indexOf("_"));
-            List<Certificate> certs = this.certificates.get(mapAlias);
-            if (certs != null) {
-                certs.add(cert);
-            }
+        final String kid = new CertificateUtils().getCertKid((X509Certificate) cert);
+        this.kids.put(alias, kid);
+        this.kidToName.put(kid, alias);
+
+        if (cert.getSigAlgOID().contains("1.2.840.113549.1.1.1")) {
+            this.algs.put(alias, "RS256");
+        } else if (cert.getSigAlgOID().contains("1.2.840.113549.1.1.10")) {
+            this.algs.put(alias, "PS256");
+        } else if (cert.getSigAlgOID().contains("1.2.840.10045.4.3.2")) {
+            this.algs.put(alias, "ES256");
         } else {
-            List<Certificate> certs = new ArrayList<>();
-            certs.add(cert);
-            this.certificates.put(alias,certs);
-
-            final String kid = new CertificateUtils().getCertKid((X509Certificate) cert);
-            this.kids.put(alias, kid);
-            this.kidToName.put(kid, alias);
-    
-            if (cert.getSigAlgOID().contains("1.2.840.113549.1.1.1")) {
-                this.algs.put(alias, "RS256");
-            } else if (cert.getSigAlgOID().contains("1.2.840.113549.1.1.10")) {
-                this.algs.put(alias, "PS256");
-            } else if (cert.getSigAlgOID().contains("1.2.840.10045.4.3.2")) {
-                this.algs.put(alias, "ES256");
-            } else {
-                throw new NotImplementedException(String.format("SigAlg OID '{}'", cert.getSigAlgOID()));
-            }
+            throw new NotImplementedException(String.format("SigAlg OID '{}'", cert.getSigAlgOID()));
         }
-        
     }
 
     @Override
-    public List<Certificate> receiveCertificate(final String keyName) {
+    public Certificate[] receiveCertificate(final String keyName) {
         return this.certificates.get(keyName);
     }
 
