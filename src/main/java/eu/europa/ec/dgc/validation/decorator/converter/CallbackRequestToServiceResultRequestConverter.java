@@ -40,6 +40,8 @@ public class CallbackRequestToServiceResultRequestConverter
         result.getDccStatus().setIssuer(callback.getIssuer());
         result.getDccStatus().setIat(callback.getIat());
         result.getDccStatus().setSub(callback.getSub());
+        result.getDccStatus().setResult(callback.getResult());
+        result.getDccStatus().setConfirmation(callback.getConfirmation());
 
         if (callback.getResults() != null) {
             result.getDccStatus().setResults(callback.getResults().stream()

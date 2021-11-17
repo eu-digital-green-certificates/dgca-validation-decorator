@@ -44,6 +44,10 @@ public class ServiceResultRequest {
 
         private String sub;
 
+        private String result;
+
+        private String confirmation;
+
         @Valid
         @NotEmpty
         private List<ResultRequest> results;
