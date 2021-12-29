@@ -35,6 +35,7 @@ dgc:
     - ValidationServiceKey-1
     - ValidationServiceKey-2
     - ValidationServiceKey-3
+    - ValidationServiceKey-4
   token:
     issuer: Validation Decorator Service
     type: JWT
