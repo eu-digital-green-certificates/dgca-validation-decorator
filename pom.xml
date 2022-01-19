@@ -47,7 +47,7 @@
         <!-- license -->
         <license.projectName>EU Digital COVID Certificate Validation Decorator / dgca-validation-decorator
         </license.projectName>
-        <license.inceptionYear>2022</license.inceptionYear>
+        <license.inceptionYear>2021</license.inceptionYear>
         <license.licenseName>apache_v2</license.licenseName>
         <!-- github -->
         <github.organization>eu-digital-green-certificates</github.organization>
@@ -215,7 +215,7 @@
             <artifactId>scp-cf</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.sap.hcp.cf.logging</groupId>
+            <groupId>com.sap.hcp.cf.ging</groupId>
             <artifactId>cf-java-logging-support-logback</artifactId>
         </dependency>
         <dependency>
